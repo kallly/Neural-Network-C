@@ -1,17 +1,17 @@
 CC=gcc
-CFLAGS= -Wall -ansi -pedantic -std=c11
-LDFLAGS=
-EXEC=rectangle
+CFLAGS= -Wall -pedantic -std=c11 -Wextra -Werror -Wno-format-contains-nul -Wformat-overflow -Wformat-security
+LDFLAGS= -lm
+EXEC=ia
 
 all: $(EXEC) clean
 
-rectangle: Rectangle.o main.o
+ia: Perceptron.o activation.o main.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 %.o: %.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-main.o: Rectangle.h
+main.o: Perceptron.h
 
 clean:
 	rm -rf *.o
