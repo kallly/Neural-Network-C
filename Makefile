@@ -1,20 +1,23 @@
 CC=gcc
 CFLAGS= -Wall -ansi -pedantic -std=c11
 LDFLAGS=
-EXEC=rectangle
+EXEC=ia
 
-all: $(EXEC) clean
+all: $(EXEC) run
 
-rectangle: Rectangle.o main.o
+ia: main.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 %.o: %.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-main.o: Rectangle.h
+main.o:
 
 clean:
 	rm -rf *.o
 
 mrproper: clean
 	rm -rf $(EXEC)
+
+run: 
+	./${EXEC}
