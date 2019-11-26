@@ -3,7 +3,7 @@ CFLAGS= -Wall -pedantic -std=c11 -Wextra -Werror -Wno-format-contains-nul -Wform
 LDFLAGS= -lm
 EXEC=ia
 
-all: $(EXEC) clean
+all: $(EXEC) run
 
 ia: Perceptron.o activation.o main.o
 	$(CC) -o $@ $^ $(LDFLAGS)
@@ -18,3 +18,6 @@ clean:
 
 mrproper: clean
 	rm -rf $(EXEC)
+
+run: 
+	./${EXEC}
