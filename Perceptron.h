@@ -12,31 +12,35 @@ typedef struct Perceptron
     {
         char*                   (*toString)(struct Perceptron*);
 
-        struct Perceptron**		(*get_prev)(struct Perceptron*);
+        struct Perceptron**	    (*get_prev)(struct Perceptron*);
         int			            (*set_prev)(struct Perceptron*,struct Perceptron**,unsigned int);
-        struct Perceptron**		(*get_next)(struct Perceptron*);
+        struct Perceptron** 	(*get_next)(struct Perceptron*);
         int			            (*set_next)(struct Perceptron*,struct Perceptron**,unsigned int);
-        double		            (*get_weight)(struct Perceptron*);
-        int			            (*set_weight)(struct Perceptron*,double);
-        double		            (*get_exit)(struct Perceptron*);
-        int			            (*set_exit)(struct Perceptron*,double);
+        
+        unsigned int		    (*get_nenter)(struct Perceptron*);
+        int			            (*set_nenter)(struct Perceptron*,unsigned int);
         unsigned int		    (*get_nprev)(struct Perceptron*);
         int			            (*set_nprev)(struct Perceptron*,unsigned int);
         unsigned int		    (*get_nnext)(struct Perceptron*);
         int			            (*set_nnext)(struct Perceptron*,unsigned int);
+
+        double*		            (*get_weights)(struct Perceptron*);
+        int			            (*set_weights)(struct Perceptron*,...);
+        double*		            (*get_exit)(struct Perceptron*);
+        int			            (*set_exit)(struct Perceptron*,double*);
+        
         
         int                     (*forming)(struct Perceptron*);
 
-        struct Perceptron **prev;
-        struct Perceptron **next;
-        unsigned int nprev;
-        unsigned int nnext;
+        struct Perceptron **prev, **next;
         
-        double weight,exit;
+        unsigned int nenter,nprev,nnext;
+        
+        double *weights,*exit;
     } Perceptron ;
 
 
-Perceptron* New_Perceptron(Perceptron **prev,unsigned int nprev,Perceptron **next,unsigned int nnext);
+Perceptron* New_Perceptron(unsigned int nenter,Perceptron **prev,unsigned int nprev,Perceptron **next,unsigned int nnext);
 
 #ifdef __cplusplus
 }

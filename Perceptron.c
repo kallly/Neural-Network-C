@@ -1,41 +1,49 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <math.h>
+#include <stdarg.h>
 
 #include "Perceptron.h"
 #include "activation.h"
 
-static void Perceptron_Init(Perceptron*);
+//
+       static void Perceptron_Init(Perceptron*);
+       
+       static char* toString(Perceptron *This);
+       
+       static Perceptron** get_prev(Perceptron *This);
+       static int set_prev(Perceptron *This,Perceptron** prev,unsigned int nprev);
+       static Perceptron** get_next(Perceptron *This);
+       static int set_next(Perceptron *This,Perceptron** next,unsigned int nnext);
+       
+       static unsigned int get_nenter(Perceptron *This);
+       static int set_nenter(Perceptron *This,unsigned int nenter);
+       static unsigned int get_nprev(Perceptron *This);
+       static int set_nprev(Perceptron *This,unsigned int nprev);
+       static unsigned int get_nnext(Perceptron *This);
+       static int set_nnext(Perceptron *This,unsigned int nnext);
+       
+       static double* get_weights(Perceptron *This);
+       static int set_weights(Perceptron *This,...);
+       static double* get_exit(Perceptron *This);
+       static int set_exit(Perceptron *This,double *exit);
+       
+       static int forming(Perceptron *This);
+//
 
-static char* toString(Perceptron *This);
-
-static Perceptron** get_prev(Perceptron *This);
-static int set_prev(Perceptron *This,Perceptron** prev,unsigned int nprev);
-static Perceptron** get_next(Perceptron *This);
-static int set_next(Perceptron *This,Perceptron** next,unsigned int nnext);
-static double get_weight(Perceptron *This);
-static int set_weight(Perceptron *This,double weight);
-static double get_exit(Perceptron *This);
-static int set_exit(Perceptron *This,double exit);
-static unsigned int get_nprev(Perceptron *This);
-static int set_nprev(Perceptron *This,unsigned int nprev);
-static unsigned int get_nnext(Perceptron *This);
-static int set_nnext(Perceptron *This,unsigned int nnext);
-
-static int forming(Perceptron *This);
 
 /******************************************************************************/
-Perceptron* New_Perceptron(Perceptron **prev,unsigned int nprev,Perceptron **next,unsigned int nnext)
+Perceptron* New_Perceptron(unsigned int nenter,Perceptron **prev,unsigned int nprev,Perceptron **next,unsigned int nnext)
 {
     Perceptron *This = malloc(sizeof(Perceptron));
     if(!This) return NULL;
     Perceptron_Init(This);
     
+    This->set_nenter(This,nenter);
     This->set_nprev(This,nprev);
     This->set_nnext(This,nnext);
 
-    if(prev!=NULL)This->set_prev(This,prev,nprev);
-    if(next!=NULL)This->set_prev(This,next,nnext);
+    if(nprev!=0)This->set_prev(This,prev,nprev);
+    if(nnext!=0)This->set_next(This,next,nnext);
 
     return This;
 }
@@ -49,22 +57,44 @@ static void Perceptron_Init(Perceptron *This)
     This->set_prev=set_prev;
     This->get_next=get_next;
     This->set_next=set_next;
-    This->get_weight=get_weight;
-    This->set_weight=set_weight;
-    This->get_exit=get_exit;
-    This->set_exit=set_exit;
+    
+    This->get_nenter=get_nenter;
+    This->set_nenter=set_nenter;
     This->get_nprev=get_nprev;
     This->set_nprev=set_nprev;
     This->get_nnext=get_nnext;
     This->set_nnext=set_nnext;
 
+    This->get_weights=get_weights;
+    This->set_weights=set_weights;
+    This->get_exit=get_exit;
+    This->set_exit=set_exit;
+    
+
     This->forming=forming;
+
+    This->nenter=0;
+    This->nprev=0;
+    This->nnext=0;
 
     This->prev=NULL;
     This->next=NULL;
 
-    This->weight=(sqrt(-2.0*log((double)rand()/RAND_MAX)))*(cos(6.28318530718*(double)rand()/RAND_MAX));;
-    This->exit=0.f;
+    This->weights=NULL;
+    This->exit=NULL;
+}
+
+/******************************************************************************/
+static unsigned int get_nenter(Perceptron *This)
+{
+          return This->nenter;
+}
+
+/******************************************************************************/
+static int set_nenter(Perceptron *This,unsigned int nenter)
+{
+       This->nenter = nenter;
+       return 1;
 }
 
 /******************************************************************************/
@@ -95,33 +125,6 @@ static int set_next(Perceptron *This,Perceptron** next,unsigned int nnext)
        return 1;
 }
 
-
-/******************************************************************************/
-static double get_weight(Perceptron *This)
-{
-       return This->weight;
-}
-
-/******************************************************************************/
-static int set_weight(Perceptron *This,double weight)
-{
-       This->weight = weight;
-       return 1;
-}
-
-/******************************************************************************/
-static double get_exit(Perceptron *This)
-{
-       return This->exit;
-}
-
-/******************************************************************************/
-static int set_exit(Perceptron *This,double exit)
-{
-       This->exit = exit;
-       return 1;
-}
-
 /******************************************************************************/
 static unsigned int get_nprev(Perceptron *This)
 {
@@ -149,27 +152,80 @@ static int set_nnext(Perceptron *This,unsigned int nnext)
 }
 
 /******************************************************************************/
-static int forming(Perceptron *This)
-{  
-    double r=0.f;
-	for(unsigned int n=0;n<This->get_nprev(This);n++){	   
-	    r+=(This->get_prev(This)[n]->get_exit(This->get_prev(This)[n]) * This->get_weight(This));
-        //printf("-->%lf\n",(This->get_prev(This)[n]->get_exit(This->get_prev(This)[n]) * This->get_weight(This)));
-    }
-	//printf("------------>%lf\n\n",r);			
-	This->set_exit(This,sigmoid(r));
+static double* get_weights(Perceptron *This)
+{
+       return This->weights;
+}
 
+/******************************************************************************/
+static int set_weights(Perceptron *This,...)
+{
+       if(This->weights!=NULL)free(This->weights);
+       This->weights = malloc( sizeof(double) * (This->get_nprev(This)));
+
+       va_list ap;
+       va_start(ap,This);
+
+       for(unsigned int n=0;n< This->get_nprev(This);n++){
+       This->weights[n] = va_arg(ap,double);
+       }
+
+       va_end(ap);
 
        return 1;
 }
 
 /******************************************************************************/
+static double* get_exit(Perceptron *This)
+{
+       return This->exit;
+}
+
+/******************************************************************************/
+static int set_exit(Perceptron *This,double *exit)
+{
+       if(This->exit!=NULL)free(This->exit);
+       This->exit = malloc( sizeof(double) * (This->get_nenter(This)));
+
+       for(unsigned int n=0;n< This->get_nenter(This);n++){
+       This->exit[n] = exit[n];
+       }
+       return 1;
+}
+
+/******************************************************************************/
+static int forming(Perceptron *This)
+{  
+    double r[This->get_nenter(This)];
+    double s[This->get_nenter(This)];
+    for(unsigned int e=0;e<This->get_nenter(This);e++){
+       r[e]=-1;
+	for(unsigned int n=0;n<This->get_nprev(This);n++){	   
+	    r[e]+=(This->get_prev(This)[n]->get_exit(This->get_prev(This)[n])[e]
+              * (This->get_weights(This)[n]) );
+        printf("-->%lf\t*\t%lf\n",(This->get_prev(This)[n]->get_exit(This->get_prev(This)[n])[e]), (This->get_weights(This)[n]) );
+       }
+	      
+       s[e]=sigmoid(r[e]); 
+       printf("------------>%lf\t------------>%lf\n",r[e],s[e]);
+    }
+    This->set_exit(This,s);
+       
+    return 1;
+}
+
+/******************************************************************************/
 static char* toString( Perceptron *This)
 {
-       size_t size = sizeof(char) * 40;
+       size_t size = sizeof(char) * 100;
        char* string = (char*)malloc(size);
        
-       snprintf(string, size, "Weight: %0.5lf\nExit: %0.5lf\n",This->get_weight(This),This->get_exit(This) );
+       snprintf(string, size, "Exit: %0.5lf\t%0.5lf\t%0.5lf\t%0.5lf\n"
+                                                 ,This->get_exit(This)[0]
+                                                 ,This->get_exit(This)[1]
+                                                 ,This->get_exit(This)[2]
+                                                 ,This->get_exit(This)[3] 
+                                                 );
        
        return string;
 }
