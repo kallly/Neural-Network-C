@@ -28,15 +28,19 @@ typedef struct Perceptron
         int			            (*set_weights)(struct Perceptron*,...);
         double*		            (*get_exit)(struct Perceptron*);
         int			            (*set_exit)(struct Perceptron*,double*);
+        double*		            (*get_exitDelta)(struct Perceptron*);
+        int			            (*set_exitDelta)(struct Perceptron*,double*);
         
-        
+    
         int                     (*forming)(struct Perceptron*);
+        int                     (*formingDelta)(struct Perceptron*);
+        int                     (*update)(struct Perceptron*);
 
-        struct Perceptron **prev, **next;
+        struct Perceptron **prev, **next, *solve;
         
         unsigned int nenter,nprev,nnext;
         
-        double *weights,*exit;
+        double *weights,*exit,*exitDelta;
     } Perceptron ;
 
 

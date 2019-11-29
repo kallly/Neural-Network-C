@@ -26,8 +26,12 @@
        static int set_weights(Perceptron *This,...);
        static double* get_exit(Perceptron *This);
        static int set_exit(Perceptron *This,double *exit);
+       static double* get_exitDelta(Perceptron *This);
+       static int set_exitDelta(Perceptron *This,double* exitDelta);
        
        static int forming(Perceptron *This);
+       static int formingDelta(Perceptron *This);
+	   static int update(Perceptron *This);
 //
 
 
@@ -69,9 +73,13 @@ static void Perceptron_Init(Perceptron *This)
     This->set_weights=set_weights;
     This->get_exit=get_exit;
     This->set_exit=set_exit;
+    This->get_exitDelta=get_exitDelta;
+    This->set_exitDelta=set_exitDelta;
     
 
     This->forming=forming;
+    This->formingDelta=formingDelta;
+	This->update=update;
 
     This->nenter=0;
     This->nprev=0;
@@ -82,6 +90,9 @@ static void Perceptron_Init(Perceptron *This)
 
     This->weights=NULL;
     This->exit=NULL;
+    This->exitDelta=NULL;
+
+    This->solve=NULL;
 }
 
 /******************************************************************************/
@@ -194,23 +205,85 @@ static int set_exit(Perceptron *This,double *exit)
 }
 
 /******************************************************************************/
+static double* get_exitDelta(Perceptron *This)
+{
+          return This->exitDelta;
+}
+
+/******************************************************************************/
+static int set_exitDelta(Perceptron *This,double* exitDelta)
+{
+       if(This->exitDelta!=NULL)free(This->exitDelta);
+       This->exitDelta = malloc( sizeof(double) * (This->get_nenter(This)));
+
+       for(unsigned int n=0;n< This->get_nenter(This);n++){
+              This->exitDelta[n] = exitDelta[n];
+       }
+       return 1;
+}
+
+/******************************************************************************/
 static int forming(Perceptron *This)
 {  
     double r[This->get_nenter(This)];
     double s[This->get_nenter(This)];
     for(unsigned int e=0;e<This->get_nenter(This);e++){
-       r[e]=-1;
-	for(unsigned int n=0;n<This->get_nprev(This);n++){	   
+       r[e]=-0.01;
+	for(unsigned int n=0;n<This->get_nprev(This);n++){	
 	    r[e]+=(This->get_prev(This)[n]->get_exit(This->get_prev(This)[n])[e]
               * (This->get_weights(This)[n]) );
         printf("-->%lf\t*\t%lf\n",(This->get_prev(This)[n]->get_exit(This->get_prev(This)[n])[e]), (This->get_weights(This)[n]) );
-       }
-	      
-       s[e]=sigmoid(r[e]); 
+       }     
+       s[e]=heaviside(r[e]); 
        printf("------------>%lf\t------------>%lf\n",r[e],s[e]);
     }
-    This->set_exit(This,s);
+    This->set_exit(This,s);	
+
+    return 1;
+}
+
+/******************************************************************************/
+static int formingDelta(Perceptron *This)
+{ 
+    double s[This->get_nenter(This)];
+    for(unsigned int e=0;e<This->get_nenter(This);e++){
+           s[e]=0.f;
+
+           s[e] += (This->get_exit(This)[e] - This->solve->get_exit(This->solve)[e] );
+  
+
+       printf("}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}------------------------>>>>>>>>>>%lf\n",s[e]);
+    }
+
+    This->set_exitDelta(This,s);
+
+    return 1;
+}
+
+/******************************************************************************/
+static int update(Perceptron *This)
+{ 
+	
        
+    double r[This->get_nnext(This)];
+	for(unsigned int n=0;n<This->get_nprev(This);n++){
+		r[n]=0.f;
+		for(unsigned int e=0;e<This->get_nenter(This);e++){
+                     printf("%lf\n",This->get_exitDelta(This)[e]);
+	    	       r[n]+=(This->get_prev(This)[n]->get_exit(This->get_prev(This)[n])[e]
+              	       * (This->get_exitDelta(This)[e]) );
+              }
+              printf("||||||||||||||||||||||||||||||||||||--------------------->>>>>>>> %lf\n",r[n]);
+    }
+	
+	double alpha = 0.1;
+
+    This->set_weights(This
+            , (This->get_weights(This)[0] - (r[0] * alpha) )
+            , (This->get_weights(This)[1] - (r[1] * alpha) )
+            , (This->get_weights(This)[2] - (r[2] * alpha) )
+            );
+
     return 1;
 }
 
