@@ -6,17 +6,69 @@
 
 #define ABS(x) (    ((x)>0)? (x) : (-x)     )
 
-int main()
-{
-    srand(time(NULL));
-    Perceptron *entree[3];
-    entree[0] = New_Perceptron(4,NULL,0,NULL,0);
-    entree[1] = New_Perceptron(4,NULL,0,NULL,0);
-    entree[2] = New_Perceptron(4,NULL,0,NULL,0);
+#define NN 4
 
-    printf("\n\n");
-    Perceptron *perceptron[2];
-    for(int n=0;n<2;n++)    perceptron[n] = New_Perceptron((unsigned int)4,entree,(unsigned int)3,NULL,0);
+typedef struct perceptronJSON
+{
+    int exit[10][10];
+}perceptronJSON;
+
+typedef struct networkJSON
+{
+    int *input;
+    int *output;
+    int *solve;
+    perceptronJSON *perceptronJS;
+}networkJSON;
+
+int main()
+{   
+    size_t ninput= 3;
+    size_t noutput= 1;
+    size_t nperceptron = 5;
+    size_t nsolve = 1;
+
+    networkJSON network;
+    network.input = malloc(sizeof(int) * ninput);
+    network.input[0] = 0;network.input[1] = 1;network.input[2] = 2;
+    network.output = malloc(sizeof(int) * noutput);
+    network.output[0]=5;
+    network.solve = malloc(sizeof(int) * nsolve);
+    network.solve[0]=6;
+    network.perceptronJS = malloc(sizeof(perceptronJSON) * nperceptron);
+    network.perceptronJS->exit[0][0] = 3;
+    network.perceptronJS->exit[0][1] = 4;
+
+    network.perceptronJS->exit[1][0] = 3;
+    network.perceptronJS->exit[1][1] = 4;
+
+    network.perceptronJS->exit[2][0] = 3;
+    network.perceptronJS->exit[2][1] = 4;
+
+    network.perceptronJS->exit[3][0] = 5;
+    network.perceptronJS->exit[4][0] = 5;
+
+    network.perceptronJS->exit[5][0] = 6;
+
+
+    srand(time(NULL));
+    
+
+
+    Perceptron **entree = malloc(sizeof(Perceptron) * ninput);
+
+    for (size_t i = 0; i < ninput; i++)
+    {
+        entree[i] = New_Perceptron(NN,NULL,0,NULL,0);
+    }
+
+    
+    Perceptron **perceptron = malloc(sizeof(Perceptron) * nperceptron);
+    
+    for(int n=0;n<(int)nperceptron;n++){    
+        perceptron[n] = New_Perceptron(nperceptron,entree,ninput,NULL,0);
+        perceptron[n]->set_nformed(perceptron[n],perceptron[n]->get_nprev(perceptron[n]));
+    }
 
     Perceptron *end = New_Perceptron((unsigned int)4,perceptron,(unsigned int)2,NULL,0);
 
@@ -40,11 +92,11 @@ int main()
                     ,(sqrt(-2.0*log((double)rand()/RAND_MAX)))*(cos(6.28318530718*(double)rand()/RAND_MAX))};
 
     perceptron[0]->set_next(perceptron[0],&end,1);
-    perceptron[0]->set_weights(perceptron[0],temp1[0],temp1[1],temp1[2]);
+    perceptron[0]->set_weights(perceptron[0],temp1);
     perceptron[1]->set_next(perceptron[1],&end,1);
-    perceptron[1]->set_weights(perceptron[1],temp2[0],temp2[1],temp2[2]);
+    perceptron[1]->set_weights(perceptron[1],temp2);
 
-    end->set_weights(end,temp3[0],temp3[1],temp3[2]);
+    end->set_weights(end,temp3);
     
 
     entree[0]->set_next(entree[0],perceptron,2);
@@ -72,15 +124,15 @@ int main()
     entree[2]->set_exit(entree[2],temp[2]);
 
     
-    for(int i=0;i<300;i++){
+    for(int i=0;i<3000;i++){
         double err=0;
-
+        for(int n=0;n<2;n++)    perceptron[n]->set_nformed(perceptron[n],perceptron[n]->get_nprev(perceptron[n]));
         perceptron[0]->forming(perceptron[0]);
         printf("---------------------------------------------------------------------------------------------FORMING1\tOK\n");
         perceptron[1]->forming(perceptron[1]);
         printf("---------------------------------------------------------------------------------------------FORMING2\tOK\n");
 
-        end->forming(end);
+        //end->forming(end);
         printf("---------------------------------------------------------------------------------------------END\tOK\n");
 
         printf("%s%lf\t%lf\t%lf\t%lf\n\n",end->toString(end),solve->get_exit(solve)[0],solve->get_exit(solve)[1],solve->get_exit(solve)[2],solve->get_exit(solve)[3]);
@@ -127,40 +179,25 @@ int main()
             test[i]->set_exit(test[i],temp);
         }
 
-        
-        
-
         Perceptron *perceptronTEST[2];
 
         for(int n=0;n<2;n++)    perceptronTEST[n] = New_Perceptron(1,test,3,NULL,0);
+        for(int n=0;n<2;n++)    perceptronTEST[n]->set_nformed(perceptronTEST[n],perceptronTEST[n]->get_nprev(perceptronTEST[n]));
 
-            perceptronTEST[0]->set_weights(perceptronTEST[0],
-                    perceptron[0]->get_weights(perceptron[0])[0]
-                    ,perceptron[0]->get_weights(perceptron[0])[1]
-                    ,perceptron[0]->get_weights(perceptron[0])[2]
-                    );
-
-            perceptronTEST[1]->set_weights(perceptronTEST[1],
-                    perceptron[1]->get_weights(perceptron[1])[0]
-                    ,perceptron[1]->get_weights(perceptron[1])[1]
-                    ,perceptron[1]->get_weights(perceptron[1])[2]
-                    );
+            perceptronTEST[0]->set_weights(perceptronTEST[0],perceptron[0]->get_weights(perceptron[0]));
+            perceptronTEST[1]->set_weights(perceptronTEST[1],perceptron[1]->get_weights(perceptron[1]));
 
             Perceptron *endTest = New_Perceptron(1,perceptronTEST,2,NULL,0);
 
-            endTest->set_weights(endTest,
-                    end->get_weights(end)[0]
-                    ,end->get_weights(end)[1]
-                    ,end->get_weights(end)[2]
-                    );
+            endTest->set_weights(endTest,end->get_weights(end));
 
-            perceptronTEST[0]->set_next(perceptronTEST[0],&end,1);
-            perceptronTEST[1]->set_next(perceptronTEST[1],&end,1);
+            perceptronTEST[0]->set_next(perceptronTEST[0],&endTest,1);
+            perceptronTEST[1]->set_next(perceptronTEST[1],&endTest,1);
 
             perceptronTEST[0]->forming(perceptronTEST[0]);
             perceptronTEST[1]->forming(perceptronTEST[1]);               
 
-            endTest->forming(endTest);
+           // endTest->forming(endTest);
 
         printf("Y: %lf\n",endTest->get_exit(endTest)[0]);
 

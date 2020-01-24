@@ -2,6 +2,7 @@
 #define CGI_PERCEPTRON_H
 
 #include <time.h>
+#include <stdbool.h> 
 
 #ifdef __cplusplus
     extern "C" {
@@ -25,7 +26,7 @@ typedef struct Perceptron
         int			            (*set_nnext)(struct Perceptron*,unsigned int);
 
         double*		            (*get_weights)(struct Perceptron*);
-        int			            (*set_weights)(struct Perceptron*,...);
+        int			            (*set_weights)(struct Perceptron*,double*);
         double*		            (*get_exit)(struct Perceptron*);
         int			            (*set_exit)(struct Perceptron*,double*);
         double*		            (*get_exitDelta)(struct Perceptron*);
@@ -36,11 +37,17 @@ typedef struct Perceptron
         int                     (*formingDelta)(struct Perceptron*);
         int                     (*update)(struct Perceptron*);
 
+        unsigned int		    (*get_nformed)(struct Perceptron*);
+        int			            (*set_nformed)(struct Perceptron*,unsigned int);
+        
         struct Perceptron **prev, **next, *solve;
         
         unsigned int nenter,nprev,nnext;
         
         double *weights,*exit,*exitDelta;
+
+        unsigned int nformed;
+
     } Perceptron ;
 
 
