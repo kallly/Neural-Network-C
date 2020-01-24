@@ -124,7 +124,7 @@ int main()
     entree[2]->set_exit(entree[2],temp[2]);
 
     
-    for(int i=0;i<3000;i++){
+    for(int i=0;i<30000;i++){
         double err=0;
         for(int n=0;n<2;n++)    perceptron[n]->set_nformed(perceptron[n],perceptron[n]->get_nprev(perceptron[n]));
         perceptron[0]->forming(perceptron[0]);
