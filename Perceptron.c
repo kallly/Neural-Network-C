@@ -41,7 +41,7 @@
 
 
 /******************************************************************************/
-Perceptron* New_Perceptron(unsigned int nenter,Perceptron **prev,unsigned int nprev,Perceptron **next,unsigned int nnext)
+Perceptron* New_Perceptron(unsigned int nenter,Perceptron **prev,unsigned int nprev,Perceptron **next __attribute__((unused)),unsigned int nnext)
 {
     Perceptron *This = malloc(sizeof(Perceptron));
     if(!This) return NULL;
@@ -51,8 +51,8 @@ Perceptron* New_Perceptron(unsigned int nenter,Perceptron **prev,unsigned int np
     This->set_nprev(This,nprev);
     This->set_nnext(This,nnext);
 
-    if(nprev!=0)This->set_prev(This,prev,nprev);
-    if(nnext!=0)This->set_next(This,next,nnext);
+    if(nprev!=0 || prev != NULL)This->set_prev(This,prev,nprev);
+    //if(nnext!=0 || next != NULL)This->set_next(This,next,nnext);
 
     return This;
 }
@@ -289,9 +289,10 @@ static int forming(Perceptron *This)
 /******************************************************************************/
 static int formingDelta(Perceptron *This)
 { 
+       
      This->set_nformedDelta(This,This->get_nformedDelta(This) + 1);
     printf("\nformingDelta -> N:%d\tGOAL:%d\n",This->get_nformedDelta(This),This->get_nnext(This));
-    if(This->get_nformedDelta(This) == (This->get_nnext(This))){
+    if(This->get_nformedDelta(This) == This->get_nnext(This)){
 
         double s[This->get_nenter(This)];
         for(unsigned int e=0;e<This->get_nenter(This);e++){
@@ -301,10 +302,10 @@ static int formingDelta(Perceptron *This)
 
            printf("}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}------------------------>>>>>>>>>>%lf\n",s[e]);
         }
-
-        for(unsigned int n=0;n<This->get_nprev(This);n++) This->get_prev(This)[n]->formingDelta(This->get_prev(This)[n]);
-
+        for(int n=This->get_nprev(This)-1;n>=0;n--) This->get_prev(This)[n]->formingDelta(This->get_prev(This)[n]);
+;
         This->set_exitDelta(This,s);
+        This->set_nformedDelta(This,-1);
     }
 
     return 1;
@@ -313,16 +314,23 @@ static int formingDelta(Perceptron *This)
 /******************************************************************************/
 static int update(Perceptron *This)
 { 
-	
-       
+	   
     double r[This->get_nprev(This)];
 	for(unsigned int n=0;n<This->get_nprev(This);n++){
 		r[n]=0.f;
+              
 		for(unsigned int e=0;e<This->get_nenter(This);e++){
+                    /* printf("-----------------------------FFFFFFFFFFFLLLLLLLAAAAAAAAAAAGGGGGG---------------\n\n");
+        printf("-----------------------------EEEEEEEEENNNNNNNNNNNNNNDDDDDDDDDDDDDDDD---------------\n\n");
+              return 0;*/
                      printf("%lf\n",This->get_exitDelta(This)[e]);
+                    
 	    	       r[n]+=(This->get_prev(This)[n]->get_exit(This->get_prev(This)[n])[e]
               	       * (This->get_exitDelta(This)[e]) );
+              
               }
+              
+              
               printf("||||||||||||||||||||||||||||||||||||--------------------->>>>>>>> %lf\n",r[n]);
     }
        double alpha = 0.1;

@@ -1,7 +1,6 @@
 #ifndef CGI_NETWORK_H
 #define CGI_NETWORK_H
 
-#include "activation.h"
 #include "Perceptron.h"
 
 #ifdef __cplusplus

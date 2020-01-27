@@ -1,27 +1,23 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "activation.h"
 #include "Network.h"
-#include "Perceptron.h"
 
 int fillInNetworkJSON(Network *network);
 
 int main()
 {   
-    Network *network = New_Network("netword_template.json","RANDOM");
+    Network *network = New_Network("netword_template2.json","RANDOM");
     
     srand(time(NULL));
 
     network->inputData(network);
-
 
     network->train(network);
 
     while (1)
     {
         network->testNetwork(network);
-
     }
   
 
