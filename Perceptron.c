@@ -31,10 +31,12 @@
        
        static int forming(Perceptron *This);
        static int formingDelta(Perceptron *This);
-	   static int update(Perceptron *This);
+	    static int update(Perceptron *This);
 
        static unsigned int get_nformed(Perceptron *This);
        static int set_nformed(Perceptron *This,unsigned int nformed);
+       static unsigned int get_nformedDelta(Perceptron *This);
+    static int set_nformedDelta(Perceptron *This,unsigned int nformedDelta);
 //
 
 
@@ -82,11 +84,13 @@ static void Perceptron_Init(Perceptron *This)
 
     This->forming=forming;
     This->formingDelta=formingDelta;
-	This->update=update;
+    This->update=update;
 
-       This->get_nformed=get_nformed;
-       This->set_nformed=set_nformed;
+    This->get_nformed=get_nformed;
+   This->set_nformed=set_nformed;
 
+    This->get_nformedDelta=get_nformedDelta;
+   This->set_nformedDelta=set_nformedDelta;
 
     This->nenter=0;
     This->nprev=0;
@@ -101,7 +105,8 @@ static void Perceptron_Init(Perceptron *This)
 
     This->solve=NULL;
 
-       This->nformed=0;
+    This->nformed=0;
+    This->nformedDelta=0;
 }
 
 /******************************************************************************/
@@ -141,8 +146,8 @@ static Perceptron** get_next(Perceptron *This)
 static int set_next(Perceptron *This,Perceptron** next,unsigned int nnext)
 {
     This->set_nnext(This,nnext);
-       This->next = next;
-       return 1;
+    This->next = next;
+    return 1;
 }
 
 /******************************************************************************/
@@ -240,11 +245,24 @@ static int set_nformed(Perceptron *This,unsigned int nformed)
 }
 
 /******************************************************************************/
+static unsigned int get_nformedDelta(Perceptron *This)
+{
+       return This->nformedDelta;
+}
+
+/******************************************************************************/
+static int set_nformedDelta(Perceptron *This,unsigned int nformedDelta)
+{
+       This->nformedDelta = nformedDelta;
+       return 1;
+}
+
+/******************************************************************************/
 static int forming(Perceptron *This)
 {  
     This->set_nformed(This,This->get_nformed(This) + 1);
     printf("\nN:%d\tGOAL:%d\n",This->get_nformed(This),This->get_nprev(This));
-    if(This->get_nformed(This) >= (This->get_nprev(This))){
+    if(This->get_nformed(This) == (This->get_nprev(This))){
         double r[This->get_nenter(This)];
         double s[This->get_nenter(This)];
         for(unsigned int e=0;e<This->get_nenter(This);e++){
@@ -259,9 +277,10 @@ static int forming(Perceptron *This)
         }
         This->set_exit(This,s);
         printf("AAAAAAAAAAAAAAA\t%d\t%lf\n",This->get_nnext(This),This->get_exit(This)[0]);
+        printf("----------------%d\n",This->get_nnext(This));
         for(unsigned int n=0;n<This->get_nnext(This);n++) This->get_next(This)[n]->forming(This->get_next(This)[n]);
         
-        This->set_nformed(This,0);
+        This->set_nformed(This,-1);
     }
 
     return 1;
@@ -270,17 +289,23 @@ static int forming(Perceptron *This)
 /******************************************************************************/
 static int formingDelta(Perceptron *This)
 { 
-    double s[This->get_nenter(This)];
-    for(unsigned int e=0;e<This->get_nenter(This);e++){
-           s[e]=0.f;
+     This->set_nformedDelta(This,This->get_nformedDelta(This) + 1);
+    printf("\nformingDelta -> N:%d\tGOAL:%d\n",This->get_nformedDelta(This),This->get_nnext(This));
+    if(This->get_nformedDelta(This) == (This->get_nnext(This))){
 
-           s[e] += (This->get_exit(This)[e] - This->solve->get_exit(This->solve)[e] );
-  
+        double s[This->get_nenter(This)];
+        for(unsigned int e=0;e<This->get_nenter(This);e++){
+               s[e]=0.f;
 
-       printf("}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}------------------------>>>>>>>>>>%lf\n",s[e]);
+               s[e] += (This->get_exit(This)[e] - This->solve->get_exit(This->solve)[e] );
+
+           printf("}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}------------------------>>>>>>>>>>%lf\n",s[e]);
+        }
+
+        for(unsigned int n=0;n<This->get_nprev(This);n++) This->get_prev(This)[n]->formingDelta(This->get_prev(This)[n]);
+
+        This->set_exitDelta(This,s);
     }
-
-    This->set_exitDelta(This,s);
 
     return 1;
 }
@@ -313,6 +338,7 @@ static int update(Perceptron *This)
 /******************************************************************************/
 static char* toString( Perceptron *This)
 {
+    
        size_t size = sizeof(char) * 100;
        char* string = (char*)malloc(size);
        
@@ -322,7 +348,6 @@ static char* toString( Perceptron *This)
                                                  ,This->get_exit(This)[2]
                                                  ,This->get_exit(This)[3] 
                                                  );
-       
        return string;
 }
 
