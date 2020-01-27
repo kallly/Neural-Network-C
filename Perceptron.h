@@ -39,6 +39,8 @@ typedef struct Perceptron
 
         unsigned int		    (*get_nformed)(struct Perceptron*);
         int			            (*set_nformed)(struct Perceptron*,unsigned int);
+        unsigned int            (*get_nformedDelta)(struct Perceptron*);
+        int                     (*set_nformedDelta)(struct Perceptron*,unsigned int);
         
         struct Perceptron **prev, **next, *solve;
         
@@ -46,7 +48,7 @@ typedef struct Perceptron
         
         double *weights,*exit,*exitDelta;
 
-        unsigned int nformed;
+        unsigned int nformed,nformedDelta;
 
     } Perceptron ;
 
