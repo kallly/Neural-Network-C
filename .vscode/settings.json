@@ -3,6 +3,7 @@
         "string.h": "c",
         "stdio.h": "c",
         "stdlib.h": "c",
-        "json.h": "c"
+        "json.h": "c",
+        "network.h": "c"
     }
 }
