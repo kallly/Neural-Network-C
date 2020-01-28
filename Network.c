@@ -8,7 +8,7 @@
 
 #define ABS(x) (    ((x)>0)? (x) : (-(x)))
 
-#define NN 4
+#define NN 8
 
 static void Network_Init(Network*);
 
@@ -72,8 +72,8 @@ static int generatesPreceptron(Network *This){
                 if(This->perceptronExit[i][j] == n){
                     tempPerceptron[np] = This->perceptron[This->perceptronExit[i][j]];
                     np++;
-                    printf("%d:%d\t",i,n);
-                    printf("%d->%p\n",This->perceptronExit[i][j],(void*)This->perceptron[This->perceptronExit[i][j]]);
+                    //printf("%d:%d\t",i,n);
+                    //printf("%d->%p\n",This->perceptronExit[i][j],(void*)This->perceptron[This->perceptronExit[i][j]]);
                 }
             }
         }
@@ -99,7 +99,7 @@ static int generatesPreceptron(Network *This){
             }
         }
             
-        This->perceptron[n] = New_Perceptron((unsigned int)4,&(This->perceptron[This->ninput]),(unsigned int)np,NULL,0);
+        This->perceptron[n] = New_Perceptron(NN,&(This->perceptron[This->ninput]),(unsigned int)np,NULL,0);
         printf("N: %d\t%p\tNperv: %d\tNnext: %d\tPrev0 :%p\n",n,
         (void*)This->perceptron[n],
         np,
@@ -109,7 +109,7 @@ static int generatesPreceptron(Network *This){
     
     temp = n;
     for(;n<This->nsolve + temp;n++){//create solve
-        This->perceptron[n] = New_Perceptron((unsigned int)4,&(This->perceptron[This->ninput + nshadow]),(unsigned int)This->noutput,NULL,0);
+        This->perceptron[n] = New_Perceptron(NN,&(This->perceptron[This->ninput + nshadow]),(unsigned int)This->noutput,NULL,0);
         printf("N: %d\t%p\tNperv: %d\tNnext: %d\tPrev0 :%p\n",n,
         (void*)This->perceptron[n],
         This->noutput,
@@ -231,7 +231,6 @@ static int fillInNetworkJSON(Network *This,char *fileName){
             printf("Neural %d / Exit %d -> %d\n",n,i,This->perceptronExit[n][i]);
         }
     }
-    
         return 0;
 }
 
@@ -239,13 +238,22 @@ static int fillInNetworkJSON(Network *This,char *fileName){
 static int train(Network *This)
 {
     double err=900;
-    for(int i=0;i<100 && err !=0;i++){
+    for(int i=0;i<10000 && err !=0;i++){
         err=0;
-        for(int n=This->ninput;n<=This->nperceptron - This->noutput - This->nsolve ;n++){
+        /*for(int n=This->ninput;n<=This->nperceptron - This->noutput - This->nsolve ;n++){
+
             This->perceptron[n]->set_nformed(This->perceptron[n],This->perceptron[n]->get_nprev(This->perceptron[n])-1);
         
             This->perceptron[n]->forming(This->perceptron[n]);
             printf("---------------------------------------------------------------------------------------------FORMING%d\tOK\n",n);
+        }*/
+        for(int n=0;n<This->ninput ;n++){
+
+            for(int i=0;i<This->nperceptronExit[n];i++){
+                printf("---------------------------------------------------------------------------------------------FORMING%d:%d\t\n",n,i);
+                This->perceptron[n]->get_next(This->perceptron[n])[i]->forming(This->perceptron[n]->get_next(This->perceptron[n])[i]);
+                printf("---------------------------------------------------------------------------------------------FORMING%d:%d\tOK\n",n,i);
+            }
         }
         //TODO : do more clean en perform
        
@@ -255,7 +263,7 @@ static int train(Network *This)
             This->perceptron[This->solve[0]]->get_exit(This->perceptron[This->solve[0]])[2],
             This->perceptron[This->solve[0]]->get_exit(This->perceptron[This->solve[0]])[3]);
        
-        for(int n=0;n<4;n++){
+        for(int n=0;n<NN;n++){
             err+= ABS(This->perceptron[This->output[0]]->get_exit(This->perceptron[This->output[0]])[n] - This->perceptron[This->solve[0]]->get_exit(This->perceptron[This->solve[0]])[n] );
         }   
         printf("---------------------------------------------------------------------------------------------ERR\tCALCULED\n");
@@ -333,10 +341,12 @@ static int testNetwork(Network *This){
             perceptronTEST[i]->set_exit(perceptronTEST[i],temp);
         }
 
-    for(int n=This->ninput;n<=This->nperceptron - This->noutput - This->nsolve ;n++){
-            perceptronTEST[n]->set_nformed(perceptronTEST[n],perceptronTEST[n]->get_nprev(perceptronTEST[n])-1);
-        
-            perceptronTEST[n]->forming(perceptronTEST[n]);
+    for(int n=0;n<This->ninput ;n++){
+            for(int i=0;i<This->nperceptronExit[n];i++){
+                printf("---------------------------------------------------------------------------------------------FORMING%d:%d\t\n",n,i);
+                This->perceptron[n]->get_next(This->perceptron[n])[i]->forming(This->perceptron[n]->get_next(This->perceptron[n])[i]);
+                printf("---------------------------------------------------------------------------------------------FORMING%d:%d\tOK\n",n,i);
+            }
         }
 
     printf("%lf\n",This->perceptron[This->output[0]]->get_exit(This->perceptron[This->output[0]])[0]);

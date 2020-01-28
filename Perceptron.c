@@ -260,27 +260,29 @@ static int set_nformedDelta(Perceptron *This,unsigned int nformedDelta)
 /******************************************************************************/
 static int forming(Perceptron *This)
 {  
-    This->set_nformed(This,This->get_nformed(This) + 1);
-    printf("\nN:%d\tGOAL:%d\n",This->get_nformed(This),This->get_nprev(This));
+	This->set_nformed(This,This->get_nformed(This) + 1);
+    printf("\nN:%d\tGOAL:%d\tAdress: %p\n",This->get_nformed(This),This->get_nprev(This),(void*)This);
     if(This->get_nformed(This) == (This->get_nprev(This))){
         double r[This->get_nenter(This)];
         double s[This->get_nenter(This)];
         for(unsigned int e=0;e<This->get_nenter(This);e++){
            r[e]=-0.01;
 	    for(unsigned int n=0;n<This->get_nprev(This);n++){	
-	        r[e]+=(This->get_prev(This)[n]->get_exit(This->get_prev(This)[n])[e]
+                  //printf("###---[ %d\tNprev: %d\n",n,This->get_nprev(This));
+
+	       r[e]+=(This->get_prev(This)[n]->get_exit(This->get_prev(This)[n])[e]
                   * (This->get_weights(This)[n]) );
-            printf("-->%lf\t*\t%lf\n",(This->get_prev(This)[n]->get_exit(This->get_prev(This)[n])[e]), (This->get_weights(This)[n]) );
-           }     
+              printf("-->%lf\t*\t%lf\n",(This->get_prev(This)[n]->get_exit(This->get_prev(This)[n])[e]), (This->get_weights(This)[n]) );
+           }  
            s[e]=heaviside(r[e]); 
            printf("------------>%lf\t------------>%lf\n",r[e],s[e]);
         }
         This->set_exit(This,s);
-        printf("AAAAAAAAAAAAAAA\t%d\t%lf\n",This->get_nnext(This),This->get_exit(This)[0]);
+        //printf("AAAAAAAAAAAAAAA\t%d\t%lf\n",This->get_nnext(This),This->get_exit(This)[0]);
         printf("----------------%d\n",This->get_nnext(This));
         for(unsigned int n=0;n<This->get_nnext(This);n++) This->get_next(This)[n]->forming(This->get_next(This)[n]);
         
-        This->set_nformed(This,-1);
+        This->set_nformed(This,0);
     }
 
     return 1;
@@ -291,7 +293,7 @@ static int formingDelta(Perceptron *This)
 { 
        
      This->set_nformedDelta(This,This->get_nformedDelta(This) + 1);
-    printf("\nformingDelta -> N:%d\tGOAL:%d\n",This->get_nformedDelta(This),This->get_nnext(This));
+    //printf("\nformingDelta -> N:%d\tGOAL:%d\n",This->get_nformedDelta(This),This->get_nnext(This));
     if(This->get_nformedDelta(This) == This->get_nnext(This)){
 
         double s[This->get_nenter(This)];
@@ -300,7 +302,7 @@ static int formingDelta(Perceptron *This)
 
                s[e] += (This->get_exit(This)[e] - This->solve->get_exit(This->solve)[e] );
 
-           printf("}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}------------------------>>>>>>>>>>%lf\n",s[e]);
+           //printf("}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}------------------------>>>>>>>>>>%lf\n",s[e]);
         }
         for(int n=This->get_nprev(This)-1;n>=0;n--) This->get_prev(This)[n]->formingDelta(This->get_prev(This)[n]);
 ;
@@ -323,15 +325,13 @@ static int update(Perceptron *This)
                     /* printf("-----------------------------FFFFFFFFFFFLLLLLLLAAAAAAAAAAAGGGGGG---------------\n\n");
         printf("-----------------------------EEEEEEEEENNNNNNNNNNNNNNDDDDDDDDDDDDDDDD---------------\n\n");
               return 0;*/
-                     printf("%lf\n",This->get_exitDelta(This)[e]);
+                     //printf("%lf\n",This->get_exitDelta(This)[e]);
                     
 	    	       r[n]+=(This->get_prev(This)[n]->get_exit(This->get_prev(This)[n])[e]
               	       * (This->get_exitDelta(This)[e]) );
-              
               }
               
-              
-              printf("||||||||||||||||||||||||||||||||||||--------------------->>>>>>>> %lf\n",r[n]);
+              //printf("||||||||||||||||||||||||||||||||||||--------------------->>>>>>>> %lf\n",r[n]);
     }
        double alpha = 0.1;
     for(unsigned int n=0;n<This->get_nprev(This);n++){
