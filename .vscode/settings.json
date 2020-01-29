@@ -4,6 +4,8 @@
         "stdio.h": "c",
         "stdlib.h": "c",
         "json.h": "c",
-        "network.h": "c"
+        "network.h": "c",
+        "perceptron.h": "c",
+        "typeinfo": "c"
     }
 }

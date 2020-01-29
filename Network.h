@@ -17,8 +17,11 @@ typedef struct Network
         int             (*generatesPreceptron)(struct Network*);
         int             (*initValueRandom)(struct Network*);
         int             (*inputData)(struct Network*);
+        int             (*inputDataCsv)(struct Network*,char*);
         int             (*testNetwork)(struct Network*);
-        
+        int             (*exportNetwork)(struct Network*,char*);
+        int             (*initValueJson)(struct Network*,char*);
+
         int             ninput;
         int             noutput;
         int             nsolve;

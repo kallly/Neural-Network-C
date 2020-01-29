@@ -11,13 +11,33 @@ int main()
     
     srand(time(NULL));
 
-    network->inputData(network);
-
+    //network->inputData(network);
+    network->inputDataCsv(network,"data/(aETb)OUnonc.csv");
     network->train(network);
-
-    while (1)
+    network->exportNetwork(network,"result.json");
+            
+    for (;;)
     {
-        network->testNetwork(network);
+        printf("\n1 train\n2 export\n3 test\n4 exit\n");
+        int choice=0;
+        scanf("%d",&choice);
+        switch (choice)
+        {
+        case 1:
+            network->train(network);
+            break;
+        case 2:
+            network->exportNetwork(network,"result.json");
+            break;
+        case 3:
+            network->testNetwork(network);
+            break;
+        case 4:
+            return 0;
+            break;
+        default:
+            break;
+        } 
     }
   
 
