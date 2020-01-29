@@ -7,10 +7,16 @@
 #ifdef __cplusplus
     extern "C" {
 #endif
+    typedef enum FuncName{
+        SIGMOID,
+        HEAVISIDE
+    }FuncName;
 
 /*  Structure représantant l'objet Perceptron. */
 typedef struct Perceptron
     {
+        int                     (*destructor)(struct Perceptron*);
+
         char*                   (*toString)(struct Perceptron*);
 
         struct Perceptron**	    (*get_prev)(struct Perceptron*);
@@ -42,6 +48,9 @@ typedef struct Perceptron
         unsigned int            (*get_nformedDelta)(struct Perceptron*);
         int                     (*set_nformedDelta)(struct Perceptron*,unsigned int);
         
+        double                  (*funcAct)(double);
+        double                  (*funcAct_d)(double);
+        
         struct Perceptron **prev, **next, *solve;
         
         unsigned int nenter,nprev,nnext;
@@ -52,8 +61,7 @@ typedef struct Perceptron
 
     } Perceptron ;
 
-
-Perceptron* New_Perceptron(unsigned int nenter,Perceptron **prev,unsigned int nprev,Perceptron **next,unsigned int nnext);
+Perceptron* New_Perceptron(unsigned int nenter,Perceptron **prev,unsigned int nprev,Perceptron **next,unsigned int nnext,FuncName funcActName);
 
 #ifdef __cplusplus
 }

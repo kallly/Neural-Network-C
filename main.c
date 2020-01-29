@@ -7,12 +7,12 @@ int fillInNetworkJSON(Network *network);
 
 int main()
 {   
-    Network *network = New_Network("netword_template2.json","RANDOM");
+    Network *network = New_Network("netword_template2.json","JSON");
     
     srand(time(NULL));
 
     //network->inputData(network);
-    network->inputDataCsv(network,"data/(aETb)OUnonc.csv");
+    network->inputDataCsv(network,"data/aOUbOUnonc.csv");
     network->train(network);
     network->exportNetwork(network,"result.json");
             
@@ -33,6 +33,8 @@ int main()
             network->testNetwork(network);
             break;
         case 4:
+            network->destructor(network);
+            free(network);
             return 0;
             break;
         default:
@@ -40,6 +42,8 @@ int main()
         } 
     }
   
+    network->destructor(network);
+    free(network);
 
 #ifdef __WIN32__
         system("PAUSE");

@@ -37,16 +37,35 @@
        static int set_nformed(Perceptron *This,unsigned int nformed);
        static unsigned int get_nformedDelta(Perceptron *This);
     static int set_nformedDelta(Perceptron *This,unsigned int nformedDelta);
+
+    static int destructor(Perceptron *This);
 //
 
 
 /******************************************************************************/
-Perceptron* New_Perceptron(unsigned int nenter,Perceptron **prev,unsigned int nprev,Perceptron **next __attribute__((unused)),unsigned int nnext)
+Perceptron* New_Perceptron(unsigned int nenter,Perceptron **prev,unsigned int nprev,Perceptron **next __attribute__((unused)),unsigned int nnext,FuncName funcActName)
 {
     Perceptron *This = malloc(sizeof(Perceptron));
     if(!This) return NULL;
     Perceptron_Init(This);
     
+    switch (funcActName)
+    {
+    case 0://SIGMOID
+        This->funcAct=sigmoid;
+        This->funcAct_d=sigmoid_d;
+        break;
+    case 1://HEAVISIDE
+        This->funcAct=heaviside;
+        This->funcAct_d=heaviside_d;
+        break;
+
+    default:
+        This->funcAct=sigmoid;
+        This->funcAct_d=sigmoid_d;
+        break;
+    }
+
     This->set_nenter(This,nenter);
     This->set_nprev(This,nprev);
     This->set_nnext(This,nnext);
@@ -60,6 +79,8 @@ Perceptron* New_Perceptron(unsigned int nenter,Perceptron **prev,unsigned int np
 /******************************************************************************/
 static void Perceptron_Init(Perceptron *This)
 {
+    This->destructor=destructor;
+
     This->toString=toString;
 
     This->get_prev=get_prev;
@@ -87,10 +108,13 @@ static void Perceptron_Init(Perceptron *This)
     This->update=update;
 
     This->get_nformed=get_nformed;
-   This->set_nformed=set_nformed;
+    This->set_nformed=set_nformed;
 
     This->get_nformedDelta=get_nformedDelta;
-   This->set_nformedDelta=set_nformedDelta;
+    This->set_nformedDelta=set_nformedDelta;
+
+    This->funcAct=sigmoid;
+    This->funcAct_d=sigmoid_d;
 
     This->nenter=0;
     This->nprev=0;
@@ -274,8 +298,10 @@ static int forming(Perceptron *This)
                   * (This->get_weights(This)[n]) );
               //printf("-->%lf\t*\t%lf\n",(This->get_prev(This)[n]->get_exit(This->get_prev(This)[n])[e]), (This->get_weights(This)[n]) );
            }  
-           s[e]=heaviside(r[e]); 
-           //printf("------------>%lf\t------------>%lf\n",r[e],s[e]);
+            
+            s[e]= This->funcAct(r[e]); 
+            
+            //printf("------------>%lf\t------------>%lf\n",r[e],s[e]);
         }
         This->set_exit(This,s);
         //printf("AAAAAAAAAAAAAAA\t%d\t%lf\n",This->get_nnext(This),This->get_exit(This)[0]);
@@ -298,9 +324,11 @@ static int formingDelta(Perceptron *This)
 
         double s[This->get_nenter(This)];
         for(unsigned int e=0;e<This->get_nenter(This);e++){
-               s[e]=0.f;
+            s[e]=0.f;
+            
+            s[e] += This->funcAct_d(This->get_exit(This)[e] - This->solve->get_exit(This->solve)[e] );
 
-               s[e] += (This->get_exit(This)[e] - This->solve->get_exit(This->solve)[e] );
+            //s[e] += (This->get_exit(This)[e] - This->solve->get_exit(This->solve)[e] );
 
            //printf("}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}------------------------>>>>>>>>>>%lf\n",s[e]);
         }
@@ -359,3 +387,12 @@ static char* toString( Perceptron *This)
        return string;
 }
 
+/******************************************************************************/
+static int destructor(Perceptron *This)
+{
+    free(This->weights);
+    free(This->exit);
+    free(This->exitDelta);
+
+    return 1;
+}

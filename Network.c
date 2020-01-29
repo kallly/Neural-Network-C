@@ -11,6 +11,7 @@
 #define NN 8
 
 static void Network_Init(Network*);
+static int destructor(Network *This);
 
 static int generatesPreceptron(Network *This);
 static int fillInNetworkJSON(Network *This,char *fileName);
@@ -48,6 +49,8 @@ Network* New_Network(char *fileName,char *initValue)
 /******************************************************************************/
 static void Network_Init(Network *This)
 {
+    This->destructor=destructor;
+
     This->generatesPreceptron=generatesPreceptron;
     This->fillInNetworkJSON=fillInNetworkJSON;
     This->train=train;
@@ -68,7 +71,7 @@ static int generatesPreceptron(Network *This){
 
     int temp,n=0;
     for (; n < This->ninput; n++){//create input
-        This->perceptron[This->input[n]] = New_Perceptron(NN,NULL,0,NULL,This->nperceptronExit[This->input[n]]);
+        This->perceptron[This->input[n]] = New_Perceptron(NN,NULL,0,NULL,This->nperceptronExit[This->input[n]],SIGMOID);
         printf("N: %d\t%p\tNperv: %d\tNnext: %d\n",n,
         (void*)This->perceptron[This->input[n]],
         0,
@@ -91,7 +94,7 @@ static int generatesPreceptron(Network *This){
             }
         }
 
-        This->perceptron[n] = New_Perceptron(NN,tempPerceptron,np,NULL,This->nperceptronExit[n]);
+        This->perceptron[n] = New_Perceptron(NN,tempPerceptron,np,NULL,This->nperceptronExit[n],SIGMOID);
         printf("N: %d\t%p\tNperv: %d\tNnext: %d\tPrev0 :%p\n",n,
         (void*)This->perceptron[n],
         np,
@@ -112,7 +115,7 @@ static int generatesPreceptron(Network *This){
             }
         }
             
-        This->perceptron[n] = New_Perceptron(NN,&(This->perceptron[This->ninput]),(unsigned int)np,NULL,0);
+        This->perceptron[n] = New_Perceptron(NN,&(This->perceptron[This->ninput]),(unsigned int)np,NULL,0,SIGMOID);
         printf("N: %d\t%p\tNperv: %d\tNnext: %d\tPrev0 :%p\n",n,
         (void*)This->perceptron[n],
         np,
@@ -122,7 +125,7 @@ static int generatesPreceptron(Network *This){
     
     temp = n;
     for(;n<This->nsolve + temp;n++){//create solve
-        This->perceptron[n] = New_Perceptron(NN,&(This->perceptron[This->ninput + nshadow]),(unsigned int)This->noutput,NULL,0);
+        This->perceptron[n] = New_Perceptron(NN,&(This->perceptron[This->ninput + nshadow]),(unsigned int)This->noutput,NULL,0,SIGMOID);
         printf("N: %d\t%p\tNperv: %d\tNnext: %d\tPrev0 :%p\n",n,
         (void*)This->perceptron[n],
         This->noutput,
@@ -251,7 +254,7 @@ static int fillInNetworkJSON(Network *This,char *fileName){
 static int train(Network *This)
 {
     double err=900;
-    for(int i=0;i<100000 && err !=0;i++){
+    for(int i=0;i<1000000 && err !=0;i++){
         err=0;
         /*for(int n=This->ninput;n<=This->nperceptron - This->noutput - This->nsolve ;n++){
 
@@ -273,6 +276,7 @@ static int train(Network *This)
         for(int n=0;n<NN;n++){
             //printf("%lf\t",This->perceptron[This->solve[0]]->get_exit(This->perceptron[This->solve[0]])[n]);
             //printf("%lf\n",This->perceptron[This->output[0]]->get_exit(This->perceptron[This->output[0]])[n]);
+            
             err+= ABS(This->perceptron[This->output[0]]->get_exit(This->perceptron[This->output[0]])[n] - This->perceptron[This->solve[0]]->get_exit(This->perceptron[This->solve[0]])[n] );
         }   
        // printf("---------------------------------------------------------------------------------------------ERR\tCALCULED\n");
@@ -287,7 +291,7 @@ static int train(Network *This)
         for(int n=This->ninput;n<This->nperceptron - 1;n++){
              This->perceptron[n]->update(This->perceptron[n]);
         }
-
+       
         printf("ERR-------------------------------------------->>>>>>>>>>>>>>>>%lf\n",err);
     
     }
@@ -511,5 +515,27 @@ static int exportNetwork(Network *This,char *fileName){
         return 0;
     }
     
+    return 1;
+}
+
+/******************************************************************************/
+static int destructor(Network *This)
+{
+    free(This->nperceptronExit);
+    free(This->input);
+    free(This->output);
+    free(This->solve);
+    
+    for(int n=0;n<This->nperceptron;n++){
+        free(This->perceptronExit[n]);
+    }
+    free(This->perceptronExit);
+ 
+    for(int n=0;n<This->nperceptron;n++){
+        This->perceptron[n]->destructor(This->perceptron[n]);
+        free(This->perceptron[n]);
+    }
+    free(This->perceptron);
+
     return 1;
 }

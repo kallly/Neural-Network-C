@@ -10,7 +10,7 @@
 /*  Structure représantant l'objet Network. */
 typedef struct Network
     {
-
+        int             (*destructor)(struct Network*);
 
         int             (*train)(struct Network*);
         int             (*fillInNetworkJSON)(struct Network*,char*);

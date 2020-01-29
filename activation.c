@@ -29,4 +29,3 @@ double reLU(double x)
 
 double reLU_d(double x)
 { return (x<=0)?0:1; }
-

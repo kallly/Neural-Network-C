@@ -6,6 +6,7 @@
         "json.h": "c",
         "network.h": "c",
         "perceptron.h": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "activation.h": "c"
     }
 }

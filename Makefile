@@ -11,7 +11,7 @@ ia: Network.o Perceptron.o activation.o main.o
 %.o: %.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-main.o: Perceptron.h  Network.h activation.o
+main.o: Perceptron.h  Network.h activation.h
 
 clean:
 	rm -rf *.o
