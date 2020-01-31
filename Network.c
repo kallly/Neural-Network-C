@@ -15,11 +15,11 @@ static int destructor(Network *This);
 
 static int generatesPreceptron(Network *This);
 static int fillInNetworkJSON(Network *This,char *fileName);
-static int train(Network *This);
+static int train(Network *This,unsigned long iter,double errMin);
 static int initValueRandom(Network *This);
 static int inputData(Network *This);
 static int testNetwork(Network *This);
-static int exportNetwork(Network *This,char *fileName);
+static int exportNetwork(Network *This,char *networkName,char *fileName);
 static int initValueJson(Network *This,char *fileName);
 static int inputDataCsv(Network *This,char *fileName);
 
@@ -251,18 +251,12 @@ static int fillInNetworkJSON(Network *This,char *fileName){
 }
 
 /******************************************************************************/
-static int train(Network *This)
+static int train(Network *This,unsigned long iter,double errMin)
 {
     double err=900;
-    for(int i=0;i<1000000 && err !=0;i++){
+    for(unsigned long i=0;i<iter && err >= errMin;i++){
         err=0;
-        /*for(int n=This->ninput;n<=This->nperceptron - This->noutput - This->nsolve ;n++){
 
-            This->perceptron[n]->set_nformed(This->perceptron[n],This->perceptron[n]->get_nprev(This->perceptron[n])-1);
-        
-            This->perceptron[n]->forming(This->perceptron[n]);
-            printf("---------------------------------------------------------------------------------------------FORMING%d\tOK\n",n);
-        }*/
         for(int n=0;n<This->ninput ;n++){
 
             for(int i=0;i<This->nperceptronExit[n];i++){
@@ -371,9 +365,9 @@ static int inputDataCsv(Network *This,char *fileName){
 
     This->perceptron[This->solve[0]]->set_exit(This->perceptron[This->solve[0]],tempSolve);
 
-    This->perceptron[0]->set_exit(This->perceptron[0],temp[0]);
-    This->perceptron[1]->set_exit(This->perceptron[1],temp[1]);
-    This->perceptron[2]->set_exit(This->perceptron[2],temp[2]);
+    for(int n=0;n<This->ninput;n++){
+    This->perceptron[n]->set_exit(This->perceptron[n],temp[n]);
+    }
 
     return 1;
 }
@@ -458,14 +452,49 @@ static int testNetwork(Network *This){
 }
 
 /******************************************************************************/
-static int exportNetwork(Network *This,char *fileName){
+static int exportNetwork(Network *This,char *networkName,char *fileName){
 
+    /*if(!strcmp(networkName,fileName)){
+        FILE* source = NULL;
+        FILE* temp = NULL;
+        char ch;
+        source = fopen(networkName, "r");
+        temp = fopen("temp", "w+");
+
+        for(int n=0; (ch = getc(source)) != EOF;n++){
+                putc(ch, temp);
+        }
+        fclose(source);
+        fclose(temp);
+    }*/
+    
     FILE* file = NULL;
+    size_t size= (strlen(networkName) + strlen(fileName) + 2) * sizeof(char);
+    char *buffer=malloc( size);
+    snprintf(buffer,size,"%s_%s",networkName,fileName);
 
     file = fopen(fileName, "w+");
-
+    
     if (file != NULL)
     {
+        FILE* source;
+        char ch;
+  
+        source = fopen(networkName, "r");
+
+       int compte;
+        for(int n=0; (ch = getc(source)) != EOF;n++){
+            if(ch=='}'){
+                compte=n;
+            }
+        }
+        rewind(source);
+        for(int n=0;(ch = getc(source)) != EOF;n++){
+            if(n!=compte){
+                putc(ch, file);
+            }
+        }
+        fclose(source);
 
         char *neural;
         neural = malloc(sizeof(char) * 772 * This->nperceptron);
@@ -496,6 +525,7 @@ static int exportNetwork(Network *This,char *fileName){
             }
                 
             snprintf(temp,sizeof(char) * 516,"\t\t\"%d\":[%s]",n,weights);
+            free(weights);
             strcat(neural,temp);
             if(n<This->nperceptron-1){
                 strcat(neural,",\n");
@@ -505,7 +535,7 @@ static int exportNetwork(Network *This,char *fileName){
 
         char *buffer;
         buffer = malloc(sizeof(char) * 1032 * This->nperceptron);
-        snprintf(buffer,sizeof(char) * 1032 * This->nperceptron,"{\n\t\"neural\":{\n%s\n\t}\n}",neural);
+        snprintf(buffer,sizeof(char) * 1032 * This->nperceptron,",\n\t\"neural\":{\n%s\n\t}\n}",neural);
 
         fputs(buffer, file);
         fclose(file);
