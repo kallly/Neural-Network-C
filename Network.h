@@ -22,6 +22,7 @@ typedef struct Network
         int             (*exportNetwork)(struct Network*,char*,char*);
         int             (*initValueJson)(struct Network*,char*);
 
+        double          err;
         int             ninput;
         int             noutput;
         int             nsolve;

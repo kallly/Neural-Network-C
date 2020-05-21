@@ -346,6 +346,7 @@ static int update(Perceptron *This)
 { 
 	   
     double r[This->get_nprev(This)];
+    double alpha = 0.01;
 	for(unsigned int n=0;n<This->get_nprev(This);n++){
 		r[n]=0.f;
               
@@ -360,11 +361,13 @@ static int update(Perceptron *This)
               }
               
               //printf("||||||||||||||||||||||||||||||||||||--------------------->>>>>>>> %lf\n",r[n]);
-    }
-       double alpha = 0.1;
-    for(unsigned int n=0;n<This->get_nprev(This);n++){
+
 	r[n]=This->get_weights(This)[n] - (r[n] * alpha);
     }
+       /*
+    for(unsigned int n=0;n<This->get_nprev(This);n++){
+           r[n]=This->get_weights(This)[n] - (r[n] * alpha);
+    }*/
 	
     This->set_weights(This,r);
 

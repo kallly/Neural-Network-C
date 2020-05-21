@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS= -Wall -pedantic -std=c11 -Wextra -Werror -Wno-format-contains-nul -Wformat-overflow -Wformat-security
-LDFLAGS= -lm -ljson-c
+LDFLAGS= -lm -ljson-c -lpthread
 EXEC=ia
 
 all: $(EXEC)

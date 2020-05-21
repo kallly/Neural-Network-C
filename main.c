@@ -1,56 +1,103 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <pthread.h>
 #include "Network.h"
 
-#define DEFAULTNETWORK ("netword_template.json")
+pthread_cond_t condition = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+#define DEFAULTNETWORK ("network_template.json")
 #define DEFAULTRESULT ("result.json")
 #define NPARAMETER 5
 
+typedef struct ThreadPara
+{
+    Network *network;
+    char **allParametre;
+    int activ;
+    int training;
+}ThreadPara;
+
+
 char** parameter(int argc,char *argv[]);
+
+void *thread_1(void *args)
+{
+    ThreadPara *threadPara = args;
+    threadPara->activ = 1;
+    for (;;)
+    {
+
+        printf("\n1 erreur\n2 export\n3 test\n4 %s\n5 exit\n",threadPara->training?"STOP train":"START train");
+        int choice=0;
+        scanf("%d",&choice);
+        pthread_mutex_lock(&mutex);
+		pthread_cond_wait(&condition, &mutex);
+        switch (choice)
+        {
+        case 1:
+            printf("ERR: %lf",threadPara->network->err);
+            break;
+        case 2:
+            threadPara->network->exportNetwork(threadPara->network,threadPara->allParametre[0],threadPara->allParametre[2]);
+            break;
+        case 3:
+            threadPara->network->testNetwork(threadPara->network);
+            break;
+        case 4:
+            threadPara->training = threadPara->training?0:1;
+            break;
+        case 5:
+            threadPara->activ = 0;
+            pthread_mutex_unlock(&mutex);
+            pthread_exit(NULL);
+            break;
+        default:
+            break;
+        }
+
+        pthread_mutex_unlock(&mutex);
+    }
+    
+    pthread_exit(NULL);
+}
 
 int main(int argc, char *argv[])
 {   
-    char **allParametre = parameter(argc,argv);
-    printf("%s\n",allParametre[0]);
-    Network *network = New_Network(allParametre[0],allParametre[1]);
+    ThreadPara *threadPara = malloc(sizeof(ThreadPara*));
+
+    threadPara->allParametre = parameter(argc,argv);
+    printf("%s\n",threadPara->allParametre[0]);
+    threadPara->network = New_Network(threadPara->allParametre[0],threadPara->allParametre[1]);
 
     srand(time(NULL));
 
     //network->inputData(network);
-    network->inputDataCsv(network,"data/(aETb)OUnonc.csv");
-    network->train(network,strtoul(allParametre[3],NULL,10),strtod(allParametre[4],NULL));
+    threadPara->network->inputDataCsv(threadPara->network,"data/chiffre_3x5.csv");
+    threadPara->network->train(threadPara->network,strtoul(threadPara->allParametre[3],NULL,10),strtod(threadPara->allParametre[4],NULL));
 
-    network->exportNetwork(network,allParametre[0],allParametre[2]);
+    pthread_t thread1;
             
-    for (;;)
-    {
-        printf("\n1 train\n2 export\n3 test\n4 exit\n");
-        int choice=0;
-        scanf("%d",&choice);
-        switch (choice)
-        {
-        case 1:
-            network->train(network,strtoul(allParametre[3],NULL,10),strtod(allParametre[4],NULL));
-            break;
-        case 2:
-            network->exportNetwork(network,allParametre[0],allParametre[2]);
-            break;
-        case 3:
-            network->testNetwork(network);
-            break;
-        case 4:
-            network->destructor(network);
-            free(network);
-            return 0;
-            break;
-        default:
-            break;
-        } 
+    if(pthread_create(&thread1, NULL, thread_1, threadPara) == -1) {
+	    perror("pthread_create");
+	    return EXIT_FAILURE;
     }
-  
-    network->destructor(network);
-    free(network);
+
+    threadPara->network->exportNetwork(threadPara->network,threadPara->allParametre[0],threadPara->allParametre[2]);
+    threadPara->activ = 1;      
+    threadPara->training = 1;
+    for(;threadPara->activ == 1;){
+        pthread_mutex_unlock (&mutex);
+        if(threadPara->training)
+            threadPara->network->train(threadPara->network,strtoul(threadPara->allParametre[3],NULL,10),strtod(threadPara->allParametre[4],NULL));
+        pthread_mutex_lock (&mutex);
+        pthread_cond_signal (&condition);
+        
+    }
+    threadPara->network->destructor(threadPara->network);
+
+    free(threadPara->network);
 
 #ifdef __WIN32__
         system("PAUSE");
