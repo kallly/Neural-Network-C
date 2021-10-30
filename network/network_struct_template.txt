@@ -1,0 +1,7 @@
+3;4//perceptron 0 link 3;4
+3;4//perceptron 1 link 3;4
+3;4//perceptron 2 link 3;4
+5//perceptron 3 link 5
+5//perceptron 4 link 5
+-42//perceptron 5
+-42//perceptron 6

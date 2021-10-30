@@ -8,6 +8,7 @@
         "perceptron.h": "c",
         "typeinfo": "c",
         "activation.h": "c",
-        "pthread.h": "c"
+        "pthread.h": "c",
+        "cstdlib": "c"
     }
 }

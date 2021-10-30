@@ -1,7 +1,11 @@
 #include "activation.h"
+#include <stdio.h>
 
 double sigmoid(double x)
 { return 1/(1+exp(-x)); }
+
+double sigmoid_b(double x)
+{ return log10(x/(1-x)); }
 
 double sigmoid_d(double x)
 { return x*(1-x); }

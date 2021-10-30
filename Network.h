@@ -13,6 +13,7 @@ typedef struct Network
         int             (*destructor)(struct Network*);
 
         int             (*train)(struct Network*,unsigned long,double);
+        int             (*fillInNetwork)(struct Network*,char*,char*);
         int             (*fillInNetworkJSON)(struct Network*,char*);
         int             (*generatesPreceptron)(struct Network*);
         int             (*initValueRandom)(struct Network*);
@@ -38,7 +39,7 @@ typedef struct Network
     } Network ;
 
 
-Network* New_Network(char *fileName,char *initValue);
+Network* New_Network(char *descFileName,char *structFileName,char *initValue);
 
 #ifdef __cplusplus
 }
