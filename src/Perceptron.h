@@ -21,20 +21,20 @@ typedef struct Synapse
 /*  Structure représantant l'objet Perceptron. */
 typedef struct Perceptron
 {    
-    int                     (*destructor)(struct Perceptron*);
+    bool                    (*destructor)(struct Perceptron*);
 
     char*                   (*toString)(struct Perceptron*);
 
-    int			            (*set_prev)(struct Perceptron*,struct Perceptron**,unsigned int);
+    bool			        (*set_prev)(struct Perceptron*,struct Perceptron**,unsigned int);
     
-    int			            (*set_next)(struct Perceptron*,struct Perceptron**,unsigned int);
+    bool			        (*set_next)(struct Perceptron*,struct Perceptron**,unsigned int);
  
     Synapse*		        (*get_synapse)(struct Perceptron*,unsigned int);
-    int			            (*set_synapse)(struct Perceptron*,unsigned int,double);
+    bool			        (*set_synapse)(struct Perceptron*,unsigned int,double);
 
-    int			            (*set_exit)(struct Perceptron*,double*);
+    bool			        (*set_exit)(struct Perceptron*,double*);
 
-    int			            (*set_exitDelta)(struct Perceptron*,double*);
+    bool			        (*set_exitDelta)(struct Perceptron*,double*);
         
 
     int                     (*forming)(struct Perceptron*);

@@ -14,32 +14,25 @@ typedef struct Network
 
         int             (*train)(struct Network*,unsigned long,double);
         int             (*fillInNetwork)(struct Network*,char*,char*);
-        int             (*fillInNetworkJSON)(struct Network*,char*);
         int             (*generatesPreceptron)(struct Network*);
         int             (*initValueRandom)(struct Network*);
         int             (*inputData)(struct Network*);
         int             (*inputDataCsv)(struct Network*,char*);
         int             (*testNetwork)(struct Network*);
-        int             (*exportNetwork)(struct Network*,char*,char*);
-        int             (*initValueJson)(struct Network*,char*);
+        int             (*exportNetwork)(struct Network*,char*);
 
         double          err;
-        int             ninput;
-        int             noutput;
-        int             nsolve;
-        int             nperceptron;
-        int             *nperceptronExit;
+        int             ninput,noutput,nsolve,nperceptron,nenter;
 
-        int             *input;
-        int             *output;
-        int             *solve;
+        int             *nperceptronExit,*input,*output,*solve;
+
         int             **perceptronExit;
 
         Perceptron      **perceptron;
     } Network ;
 
 
-Network* New_Network(char *descFileName,char *structFileName,char *initValue);
+Network* New_Network(char *descFileName,char *structFileName,char *initValue,int nenter);
 
 #ifdef __cplusplus
 }
