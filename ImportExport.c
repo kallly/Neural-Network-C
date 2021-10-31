@@ -18,7 +18,7 @@ int scanLine(FILE *fp, int *data)
         fscanf(fp, "%c", &trash);
     } while (trash == ';');
 
-    char bufferTrash[256];
+    char bufferTrash[1024];
     fgets(bufferTrash, 1024, fp);
 
     return 0;
