@@ -14,14 +14,12 @@ typedef struct Network
 
         int             (*train)(struct Network*,unsigned long,double);
         int             (*fillInNetwork)(struct Network*,char*,char*);
-        int             (*fillInNetworkJSON)(struct Network*,char*);
         int             (*generatesPreceptron)(struct Network*);
         int             (*initValueRandom)(struct Network*);
         int             (*inputData)(struct Network*);
         int             (*inputDataCsv)(struct Network*,char*);
         int             (*testNetwork)(struct Network*);
         int             (*exportNetwork)(struct Network*,char*);
-        int             (*initValueJson)(struct Network*,char*);
 
         double          err;
         int             ninput,noutput,nsolve,nperceptron,nenter;

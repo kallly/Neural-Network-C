@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <json-c/json.h>
 
 #include "Network.h"
 #include "ImportExport.h"
@@ -26,19 +25,12 @@ Network *New_Network(char *descFileName, char *structFileName, char *initValue, 
         return NULL;
     Network_Init(This);
     This->nenter = nenter;
-
     fillInNetwork(This, descFileName, structFileName);
     generatesPreceptron(This);
+
     if (!strcmp(initValue, "RANDOM"))
     {
         initValueRandom(This);
-    }
-    else
-    {
-        if (!strcmp(initValue, "JSON"))
-        {
-            initValueJson(This, "result.json");
-        }
     }
 
     return This;
@@ -51,14 +43,12 @@ static void Network_Init(Network *This)
 
     This->generatesPreceptron = generatesPreceptron;
     This->fillInNetwork = fillInNetwork;
-    This->fillInNetworkJSON = fillInNetworkJSON;
     This->train = train;
     This->initValueRandom = initValueRandom;
     This->inputData = inputData;
     This->inputDataCsv = inputDataCsv;
     This->testNetwork = testNetwork;
     This->exportNetwork = exportNetwork;
-    This->initValueJson = initValueJson;
 }
 
 /******************************************************************************/

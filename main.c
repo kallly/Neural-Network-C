@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+
 #include "Network.h"
 
 #define NN "8"
@@ -15,7 +16,6 @@ char **parameter(int argc, char *argv[]);
 
 int main(int argc, char *argv[])
 {
-
     char **allParametre = parameter(argc, argv);
 
     Network *network = New_Network(allParametre[5], allParametre[6], allParametre[1],strtoul(allParametre[0], NULL, 10));
