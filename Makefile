@@ -1,17 +1,30 @@
 CC=gcc
-CFLAGS= -g -Wall -pedantic -std=c11 -Wextra -Werror -Wno-format-contains-nul -Wformat-overflow -Wformat-security
-LDFLAGS= -lm -lpthread
-EXEC=ia
+CFLAGS=-g -Wall -pedantic -std=c11 -Wextra -Werror -Wno-format-contains-nul -Wformat-overflow -Wformat-security
+LDFLAGS=-lm -lpthread
 
-all: $(EXEC) clean
+NAME=brain.bin
+EXEC=$(NAME)
 
-ia: Network.o Perceptron.o activation.o ImportExport.o main.o
-	$(CC) -o $@ $^ $(LDFLAGS)
+SRCDIR=src
+OBJDIR=obj
 
-%.o: %.c
+_OBJ=Network.o Perceptron.o activation.o ImportExport.o main.o
+_HEAD=Perceptron.h  Network.h activation.h ImportExport.h
+
+
+OBJ = $(patsubst %,$(OBJDIR)/%,$(_OBJ))
+HEAD = $(patsubst %,$(SRCDIR)/%,$(_HEAD))
+
+
+all: $(EXEC)
+
+$(NAME): $(OBJ)
+	$(CC) -o $@  $^ $(LDFLAGS)
+
+$(OBJDIR)/%.o: $(SRCDIR)/%.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-main.o: Perceptron.h  Network.h activation.h ImportExport.h
+main.o: $(HEAD)
 
 clean:
 	rm -rf *.o

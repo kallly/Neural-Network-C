@@ -117,7 +117,7 @@ int exportNetwork(Network *This, char *fileName)
     for (int i = 0; i < This->nperceptron; i++)
     {
         char *weights;
-        weights = malloc(sizeof(char) * 1024);
+        weights = calloc(1024,sizeof(char));
 
         if (This->perceptron[i]->nprev>0)
         {

@@ -1,7 +1,7 @@
 //perceptron 0
 //perceptron 1
 //perceptron 2
-3.142366;3.142369;-6.287206//perceptron 3
-3.139012;3.139011;-6.280511//perceptron 4
-6.413728;4.013508//perceptron 5
+2.791416;2.791417;-5.587800//perceptron 3
+2.789703;2.789706;-5.584394//perceptron 4
+4.994813;4.120216//perceptron 5
 //perceptron 6
