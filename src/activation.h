@@ -5,6 +5,7 @@
 
 
 double sigmoid(double x);
+double sigmoid_b(double x);
 double sigmoid_d(double x);
 double heaviside(double x);
 double heaviside_d(double x);
