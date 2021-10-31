@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 
     //network->inputData(network);
     network->inputDataCsv(network, "data/aOUbOUnonc.csv");
-
+    network->train(network, strtoul(allParametre[3], NULL, 10), strtod(allParametre[4], NULL));
     do
     {
         printf("\n1 erreur\n2 export\n3 test\n4 %s\n5 exit\n", "START train");
@@ -48,6 +48,10 @@ int main(int argc, char *argv[])
             break;
         case 5:
             end = true;
+            break;
+        case 6:
+            network->initValueRandom(network);
+            network->train(network, strtoul(allParametre[3], NULL, 10), strtod(allParametre[4], NULL));
             break;
         default:
             break;

@@ -83,7 +83,6 @@ static void Perceptron_Init(Perceptron *This)
 	This->update = update;
 
 	This->funcAct = sigmoid;
-	This->funcAct_b = sigmoid_b;
 	This->funcAct_d = sigmoid_d;
 
 	This->nenter = 0;
@@ -202,7 +201,7 @@ static int forming(Perceptron *This)
 		double s[This->nenter];
 		for (unsigned int e = 0; e < This->nenter; e++)
 		{
-			r[e] = -0.01;
+			r[e] = 0.0f;
 			for (unsigned int n = 0; n < This->nprev; n++)
 			{
 				//printf("###---[ %d\tNprev: %d\n", n, This->nprev;
@@ -236,7 +235,7 @@ static int formingDelta(Perceptron *This)
 {
 
 	This->nformedDelta = This->nformedDelta + 1;
-	//printf("\nformingDelta -> N:%d\tGOAL:%d\n",This->nformedDelta,This->nnext);
+
 	if (This->nformedDelta == This->nnext && This->nprev > 0)
 	{
 
@@ -245,13 +244,18 @@ static int formingDelta(Perceptron *This)
 		{
 			s[e] = 0.f;
 
+			double diff;
+			if(This->nnext == 0){
+				//printf("%lf %lf\n",This->output->exit[e],This->solve->exit[e]);
+				s[e] = /*This->funcAct_d*/(This->output->exit[e] - This->solve->exit[e]);
+			}
 
-			double diff = This->output->exit[e] - This->solve->exit[e];
-			s[e] = diff;
-			//printf("ID: %d -> delta = %lf",This->id,diff);
-			for(unsigned int i=0;i<This->nnext;i++){
-				//printf(" * %lf",This->next[i]->get_synapse(This->next[i], This->id)->weight);
-				s[e] *= This->next[i]->get_synapse(This->next[i], This->id)->weight;
+			//printf("ID: %d -> delta = ",This->id);
+			for(unsigned int i=0;i<This->nnext;i++)
+			{
+				diff = This->next[i]->exitDelta[e];
+				//printf("%lf * %lf + ",diff ,This->next[i]->get_synapse(This->next[i], This->id)->weight);
+				s[e] += diff * This->exit[e] * This->next[i]->get_synapse(This->next[i], This->id)->weight;
 			}
 			//printf(" = %lf\n",s[e]);
 		}
@@ -259,8 +263,6 @@ static int formingDelta(Perceptron *This)
 
 		for (int n = This->nprev - 1; n >= 0; n--)
 			This->prev[n]->formingDelta(This->prev[n]);
-
-		This->nformedDelta = -1;
 	}
 
 	return true;
@@ -269,6 +271,7 @@ static int formingDelta(Perceptron *This)
 /******************************************************************************/
 static int update(Perceptron *This)
 {
+	This->nformedDelta = 0;
 
 	double r;
 	double alpha = 0.05;
@@ -277,9 +280,18 @@ static int update(Perceptron *This)
 		r = 0.f;
 		
 		//printf("ID: %d ", This->id);	
+
 		for (unsigned int e = 0; e < This->nenter; e++)
 		{
-			r += This->exitDelta[e] * This->prev[n]->exit[e];
+			double delta = This->exitDelta[e];
+			/*double weights = 1;
+			for(unsigned int i=0;i<This->nnext;i++)
+			{
+				//printf(" * %lf",This->next[i]->get_synapse(This->next[i], This->id)->weight);
+				weights *= This->next[i]->get_synapse(This->next[i], This->id)->weight;
+			}*/
+			double input = This->prev[n]->exit[e];
+			r += input * /*weights **/ delta;
 			//printf("%lf * %lf + ",This->exitDelta[e],This->prev[n]->exit[e]);
 		}
 
@@ -287,9 +299,9 @@ static int update(Perceptron *This)
 		
 		//printf("\nID: %d w = %lf - (0.01 * %lf)\n",This->id,weight,r);
 		
-		r = weight - (r * alpha);
+		r = weight - (alpha * r);
 
-		
+		//printf("ID: %d -> %lf\n",This->id,r);
 		This->set_synapse(This, This->prev[n]->id, r);
 	}
 

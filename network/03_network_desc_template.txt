@@ -1,0 +1,7 @@
+3//nInput
+1//nOutput
+1//nSolve
+7//nPerceptron
+0;1;2//input
+5//output
+6//solve

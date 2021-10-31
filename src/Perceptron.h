@@ -42,7 +42,6 @@ typedef struct Perceptron
     int                     (*update)(struct Perceptron*);
     
     double                  (*funcAct)(double);
-    double                  (*funcAct_b)(double);
     double                  (*funcAct_d)(double);
     
     struct Perceptron **prev, **next, *output, *solve;

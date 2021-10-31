@@ -27,8 +27,8 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c
 main.o: $(HEAD)
 
 clean:
-	rm -rf *.o
+	rm $(OBJDIR)/*.o
 	
 mrproper: clean
-	rm -rf $(EXEC)
+	rm $(EXEC)
 

@@ -224,7 +224,7 @@ static int train(Network *This, unsigned long iter, double errMin)
         {
 
             This->perceptron[n]->nformedDelta = This->perceptron[n]->nnext - 1;
-
+            
             This->perceptron[n]->formingDelta(This->perceptron[n]);
             //   printf("---------------------------------------------------------------------------------------------END_DELTA%d\tOK\n",n);
         }

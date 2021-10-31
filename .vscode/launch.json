@@ -8,7 +8,7 @@
             "name": "(gdb) Lancer",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/ia",
+            "program": "${workspaceFolder}/brain.bin",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
