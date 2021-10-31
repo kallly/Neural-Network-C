@@ -5,13 +5,13 @@ EXEC=ia
 
 all: $(EXEC)
 
-ia: Network.o Perceptron.o activation.o main.o
+ia: Network.o Perceptron.o activation.o ImportExport.o main.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 %.o: %.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-main.o: Perceptron.h  Network.h activation.h
+main.o: Perceptron.h  Network.h activation.h ImportExport.h
 
 clean:
 	rm -rf *.o

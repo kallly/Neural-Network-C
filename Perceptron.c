@@ -10,34 +10,18 @@ static void Perceptron_Init(Perceptron *);
 
 static char *toString(Perceptron *This);
 
-static Perceptron **get_prev(Perceptron *This);
 static int set_prev(Perceptron *This, Perceptron **prev, unsigned int nprev);
-static Perceptron **get_next(Perceptron *This);
 static int set_next(Perceptron *This, Perceptron **next, unsigned int nnext);
-
-static unsigned int get_nenter(Perceptron *This);
-static int set_nenter(Perceptron *This, unsigned int nenter);
-static unsigned int get_nprev(Perceptron *This);
-static int set_nprev(Perceptron *This, unsigned int nprev);
-static unsigned int get_nnext(Perceptron *This);
-static int set_nnext(Perceptron *This, unsigned int nnext);
 
 static Synapse *get_synapse(Perceptron *This, unsigned int id);
 static int set_synapse(Perceptron *This, unsigned int id, double weight);
-static double *get_exit(Perceptron *This);
+
 static int set_exit(Perceptron *This, double *exit);
-static double *get_exitDelta(Perceptron *This);
 static int set_exitDelta(Perceptron *This, double *exitDelta);
 
 static int forming(Perceptron *This);
 static int formingDelta(Perceptron *This);
 static int update(Perceptron *This);
-
-static unsigned int get_nformed(Perceptron *This);
-static int set_nformed(Perceptron *This, unsigned int nformed);
-static unsigned int get_nformedDelta(Perceptron *This);
-static int set_nformedDelta(Perceptron *This, unsigned int nformedDelta);
-
 static int destructor(Perceptron *This);
 //
 
@@ -66,9 +50,9 @@ Perceptron *New_Perceptron(unsigned int id, unsigned int nenter, Perceptron **pr
 		break;
 	}
 
-	This->set_nenter(This, nenter);
-	This->set_nprev(This, nprev);
-	This->set_nnext(This, nnext);
+	This->nenter = nenter;
+	This->nprev = nprev;
+	This->nnext = nnext;
 	This->id = id;
 
 	if (prev != NULL)
@@ -86,34 +70,17 @@ static void Perceptron_Init(Perceptron *This)
 
 	This->toString = toString;
 
-	This->get_prev = get_prev;
 	This->set_prev = set_prev;
-	This->get_next = get_next;
 	This->set_next = set_next;
-
-	This->get_nenter = get_nenter;
-	This->set_nenter = set_nenter;
-	This->get_nprev = get_nprev;
-	This->set_nprev = set_nprev;
-	This->get_nnext = get_nnext;
-	This->set_nnext = set_nnext;
 
 	This->get_synapse = get_synapse;
 	This->set_synapse = set_synapse;
-	This->get_exit = get_exit;
 	This->set_exit = set_exit;
-	This->get_exitDelta = get_exitDelta;
 	This->set_exitDelta = set_exitDelta;
 
 	This->forming = forming;
 	This->formingDelta = formingDelta;
 	This->update = update;
-
-	This->get_nformed = get_nformed;
-	This->set_nformed = set_nformed;
-
-	This->get_nformedDelta = get_nformedDelta;
-	This->set_nformedDelta = set_nformedDelta;
 
 	This->funcAct = sigmoid;
 	This->funcAct_b = sigmoid_b;
@@ -138,28 +105,9 @@ static void Perceptron_Init(Perceptron *This)
 }
 
 /******************************************************************************/
-static unsigned int get_nenter(Perceptron *This)
-{
-	return This->nenter;
-}
-
-/******************************************************************************/
-static int set_nenter(Perceptron *This, unsigned int nenter)
-{
-	This->nenter = nenter;
-	return 1;
-}
-
-/******************************************************************************/
-static Perceptron **get_prev(Perceptron *This)
-{
-	return This->prev;
-}
-
-/******************************************************************************/
 static int set_prev(Perceptron *This, Perceptron **prev, unsigned int nprev)
 {
-	This->set_nprev(This, nprev);
+	This->nprev = nprev;
 	This->prev = prev;
 
 	if (This->synapses != NULL)
@@ -168,7 +116,7 @@ static int set_prev(Perceptron *This, Perceptron **prev, unsigned int nprev)
 	}
 	This->synapses = malloc(sizeof(Synapse *) * nprev);
 
-	for (unsigned int n = 0; n < This->get_nprev(This); n++)
+	for (unsigned int n = 0; n < This->nprev; n++)
 	{
 		This->synapses[n] = malloc(sizeof(Synapse));
 		This->synapses[n]->id = This->prev[n]->id;
@@ -178,49 +126,17 @@ static int set_prev(Perceptron *This, Perceptron **prev, unsigned int nprev)
 }
 
 /******************************************************************************/
-static Perceptron **get_next(Perceptron *This)
-{
-	return This->next;
-}
-
-/******************************************************************************/
 static int set_next(Perceptron *This, Perceptron **next, unsigned int nnext)
 {
-	This->set_nnext(This, nnext);
-	This->next = next;
-	return 1;
-}
-
-/******************************************************************************/
-static unsigned int get_nprev(Perceptron *This)
-{
-	return This->nprev;
-}
-
-/******************************************************************************/
-static int set_nprev(Perceptron *This, unsigned int nprev)
-{
-	This->nprev = nprev;
-	return 1;
-}
-
-/******************************************************************************/
-static unsigned int get_nnext(Perceptron *This)
-{
-	return This->nnext;
-}
-
-/******************************************************************************/
-static int set_nnext(Perceptron *This, unsigned int nnext)
-{
 	This->nnext = nnext;
+	This->next = next;
 	return 1;
 }
 
 /******************************************************************************/
 static Synapse *get_synapse(Perceptron *This, unsigned int id)
 {
-	for (unsigned int n = 0; n < This->get_nprev(This); n++)
+	for (unsigned int n = 0; n < This->nprev; n++)
 	{
 		if (This->synapses[n]->id == id)
 		{
@@ -233,7 +149,7 @@ static Synapse *get_synapse(Perceptron *This, unsigned int id)
 /******************************************************************************/
 static int set_synapse(Perceptron *This, unsigned int id, double weight)
 {
-	for (unsigned int n = 0; n < This->get_nprev(This); n++)
+	for (unsigned int n = 0; n < This->nprev; n++)
 	{
 		if (This->synapses[n]->id == id)
 		{
@@ -246,39 +162,28 @@ static int set_synapse(Perceptron *This, unsigned int id, double weight)
 }
 
 /******************************************************************************/
-static double *get_exit(Perceptron *This)
-{
-	return This->exit;
-}
-
-/******************************************************************************/
 static int set_exit(Perceptron *This, double *exit)
 {
 	if (This->exit != NULL)
 		free(This->exit);
-	This->exit = malloc(sizeof(double) * (This->get_nenter(This)));
+	This->exit = malloc(sizeof(double) * (This->nenter));
 
-	for (unsigned int n = 0; n < This->get_nenter(This); n++)
+	for (unsigned int n = 0; n < This->nenter; n++)
 	{
 		This->exit[n] = exit[n];
 	}
 	return 1;
 }
 
-/******************************************************************************/
-static double *get_exitDelta(Perceptron *This)
-{
-	return This->exitDelta;
-}
 
 /******************************************************************************/
 static int set_exitDelta(Perceptron *This, double *exitDelta)
 {
 	if (This->exitDelta != NULL)
 		free(This->exitDelta);
-	This->exitDelta = malloc(sizeof(double) * (This->get_nenter(This)));
+	This->exitDelta = malloc(sizeof(double) * (This->nenter));
 
-	for (unsigned int n = 0; n < This->get_nenter(This); n++)
+	for (unsigned int n = 0; n < This->nenter; n++)
 	{
 		This->exitDelta[n] = exitDelta[n];
 	}
@@ -286,51 +191,25 @@ static int set_exitDelta(Perceptron *This, double *exitDelta)
 }
 
 /******************************************************************************/
-static unsigned int get_nformed(Perceptron *This)
-{
-	return This->nformed;
-}
-
-/******************************************************************************/
-static int set_nformed(Perceptron *This, unsigned int nformed)
-{
-	This->nformed = nformed;
-	return 1;
-}
-
-/******************************************************************************/
-static unsigned int get_nformedDelta(Perceptron *This)
-{
-	return This->nformedDelta;
-}
-
-/******************************************************************************/
-static int set_nformedDelta(Perceptron *This, unsigned int nformedDelta)
-{
-	This->nformedDelta = nformedDelta;
-	return 1;
-}
-
-/******************************************************************************/
 static int forming(Perceptron *This)
 {
-	This->set_nformed(This, This->get_nformed(This) + 1);
-	//printf("\nN:%d\tGOAL:%d\tAdress: %p\n", This->get_nformed(This), This->get_nprev(This), (void *)This);
-	if (This->get_nformed(This) == (This->get_nprev(This)))
+	This->nformed = This->nformed + 1;
+	//printf("\nN:%d\tGOAL:%d\tAdress: %p\n", This->get_nformed(This), This->nprev;
+	if (This->nformed == This->nprev)
 	{
-		double r[This->get_nenter(This)];
-		double s[This->get_nenter(This)];
-		for (unsigned int e = 0; e < This->get_nenter(This); e++)
+		double r[This->nenter];
+		double s[This->nenter];
+		for (unsigned int e = 0; e < This->nenter; e++)
 		{
 			r[e] = -0.01;
-			for (unsigned int n = 0; n < This->get_nprev(This); n++)
+			for (unsigned int n = 0; n < This->nprev; n++)
 			{
-				//printf("###---[ %d\tNprev: %d\n", n, This->get_nprev(This));
-				//printf("%p", (void *)This->get_prev(This)[n] );
+				//printf("###---[ %d\tNprev: %d\n", n, This->nprev;
+				//printf("%p", (void *)This->prev[n] );
 
-				double weight = This->get_synapse(This, This->get_prev(This)[n]->id)->weight;
-				r[e] += (This->get_prev(This)[n]->get_exit(This->get_prev(This)[n])[e] * weight);
-				//printf("-->%lf\t*\t%lf\t=\t%lf\n", (This->get_prev(This)[n]->get_exit(This->get_prev(This)[n])[e]), weight, r[e]);
+				double weight = This->get_synapse(This, This->prev[n]->id)->weight;
+				r[e] += This->prev[n]->exit[e] * weight;
+				//printf("-->%lf\t*\t%lf\t=\t%lf\n", (This->prev[n]->exit[n])[e]), weight, r[e]);
 			}
 
 			s[e] = This->funcAct(r[e]);
@@ -340,12 +219,12 @@ static int forming(Perceptron *This)
 
 		//printf("%p : %lf\n",(void *)This,s[0]);
 		This->set_exit(This, s);
-		//printf("AAAAAAAAAAAAAAA\t%d\t%lf\n",This->get_nnext(This),This->get_exit(This)[0]);
-		//printf("----------------%d\n",This->get_nnext(This));
-		for (unsigned int n = 0; n < This->get_nnext(This); n++)
-			This->get_next(This)[n]->forming(This->get_next(This)[n]);
+		//printf("AAAAAAAAAAAAAAA\t%d\t%lf\n",This->nnext,This->exit[0]);
+		//printf("----------------%d\n",This->nnext);
+		for (unsigned int n = 0; n < This->nnext; n++)
+			This->next[n]->forming(This->next[n]);
 
-		This->set_nformed(This, 0);
+		This->nformed = 0;
 	}
 
 	return 1;
@@ -355,52 +234,52 @@ static int forming(Perceptron *This)
 static int formingDelta(Perceptron *This)
 {
 
-	This->set_nformedDelta(This, This->get_nformedDelta(This) + 1);
-	//printf("\nformingDelta -> N:%d\tGOAL:%d\n",This->get_nformedDelta(This),This->get_nnext(This));
-	if (This->get_nformedDelta(This) == This->get_nnext(This) && This->get_nprev(This) > 0)
+	This->nformedDelta = This->nformedDelta + 1;
+	//printf("\nformingDelta -> N:%d\tGOAL:%d\n",This->nformedDelta,This->nnext);
+	if (This->nformedDelta == This->nnext && This->nprev > 0)
 	{
 
-		double s[This->get_nenter(This)];
-		for (unsigned int e = 0; e < This->get_nenter(This); e++)
+		double s[This->nenter];
+		for (unsigned int e = 0; e < This->nenter; e++)
 		{
 			s[e] = 0.f;
 
 			if (This->solve != NULL)
 			{
-				s[e] += This->funcAct_d(This->get_exit(This)[e] - This->solve->get_exit(This->solve)[e]);
+				s[e] += This->funcAct_d(This->exit[e] - This->solve->exit[e]);
 			}
 			else
 			{
-				if (This->get_nnext(This) != 0)
+				if (This->nnext != 0)
 				{
-					for (unsigned int n = 0; n < This->get_nnext(This); n++)
+					for (unsigned int n = 0; n < This->nnext; n++)
 					{
-						s[e] += This->get_next(This)[n]->get_exitDelta(This->get_next(This)[n])[e];
+						s[e] += This->next[n]->exitDelta[e];
 					}
 
 					//double exit = 0;
 					//
-					//printf("%d: ln(%lf)\t",This->id, This->get_exit(This)[e]);
-					//for (unsigned int n = 0; n < This->get_nnext(This); n++)
+					//printf("%d: ln(%lf)\t",This->id, This->exit[e]);
+					//for (unsigned int n = 0; n < This->nnext; n++)
 					//{
-					//	double weight = This->get_synapse(This->get_next(This)[n], This->id)->weight;
-					//	exit += This->funcAct_b(This->get_exit(This)[e]) / weight;
+					//	double weight = This->get_synapse(This->next[n], This->id)->weight;
+					//	exit += This->funcAct_b(This->exit[e]) / weight;
 					//	printf("%lf; ",weight);
 					//}
 					//
-					//printf("%lf / %d = %lf\n", exit, This->get_nnext(This), exit/This->get_nnext(This));
-					//exit /= This->get_nnext(This);
+					//printf("%lf / %d = %lf\n", exit, This->nnext, exit/This->nnext);
+					//exit /= This->nnext;
 					//
-					//s[e] += This->funcAct_d(This->get_exit(This)[e] - exit);
+					//s[e] += This->funcAct_d(This->exit[e] - exit);
 				}
 			}
 		}
 		This->set_exitDelta(This, s);
 
-		for (int n = This->get_nprev(This) - 1; n >= 0; n--)
-			This->get_prev(This)[n]->formingDelta(This->get_prev(This)[n]);
-		;
-		This->set_nformedDelta(This, -1);
+		for (int n = This->nprev - 1; n >= 0; n--)
+			This->prev[n]->formingDelta(This->prev[n]);
+
+		This->nformedDelta = -1;
 	}
 
 	return 1;
@@ -412,26 +291,26 @@ static int update(Perceptron *This)
 
 	double r;
 	double alpha = 0.01;
-	for (unsigned int n = 0; n < This->get_nprev(This); n++)
+	for (unsigned int n = 0; n < This->nprev; n++)
 	{
 		r = 0.f;
 
-		for (unsigned int e = 0; e < This->get_nenter(This); e++)
+		for (unsigned int e = 0; e < This->nenter; e++)
 		{
 			/* printf("-----------------------------FFFFFFFFFFFLLLLLLLAAAAAAAAAAAGGGGGG---------------\n\n");
         printf("-----------------------------EEEEEEEEENNNNNNNNNNNNNNDDDDDDDDDDDDDDDD---------------\n\n");
               return 0;*/
 			//printf("%lf\n",This->get_exitDelta(This)[e]);
 
-			r += (This->get_prev(This)[n]->get_exit(This->get_prev(This)[n])[e] * (This->get_exitDelta(This)[e]));
+			r += This->prev[n]->exit[e] * This->exitDelta[e];
 		}
 
 		//printf("||||||||||||||||||||||||||||||||||||--------------------->>>>>>>> %lf\n",r[n]);
 
-		double weight = This->get_synapse(This, This->get_prev(This)[n]->id)->weight;
+		double weight = This->get_synapse(This, This->prev[n]->id)->weight;
 		r = weight - (r * alpha);
 
-		This->set_synapse(This, This->get_prev(This)[n]->id, r);
+		This->set_synapse(This, This->prev[n]->id, r);
 	}
 
 	return 1;
@@ -444,7 +323,7 @@ static char *toString(Perceptron *This)
 	size_t size = sizeof(char) * 100;
 	char *string = (char *)malloc(size);
 
-	snprintf(string, size, "Exit: %0.5lf\t%0.5lf\t%0.5lf\t%0.5lf\n", This->get_exit(This)[0], This->get_exit(This)[1], This->get_exit(This)[2], This->get_exit(This)[3]);
+	snprintf(string, size, "Exit: %0.5lf\t%0.5lf\t%0.5lf\t%0.5lf\n", This->exit[0], This->exit[1], This->exit[2], This->exit[3]);
 	return string;
 }
 

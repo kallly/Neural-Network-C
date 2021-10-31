@@ -9,6 +9,7 @@
         "typeinfo": "c",
         "activation.h": "c",
         "pthread.h": "c",
-        "cstdlib": "c"
+        "cstdlib": "c",
+        "importexport.h": "c"
     }
 }
