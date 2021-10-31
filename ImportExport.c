@@ -6,8 +6,6 @@
 
 #include "ImportExport.h"
 
-#define NN 8
-
 /******************************************************************************/
 int scanLine(FILE *fp, int *data)
 {
@@ -303,8 +301,8 @@ int inputDataCsv(Network *This, char *fileName)
 
     file = fopen(fileName, "r");
 
-    double tempSolve[NN];
-    double temp[This->ninput][NN];
+    double tempSolve[This->nenter];
+    double temp[This->ninput][This->nenter];
 
     if (file == NULL)
     {
@@ -318,7 +316,7 @@ int inputDataCsv(Network *This, char *fileName)
             chaine = fgetc(file);
             //printf("%c", chaine);
         }
-        for (int n = 0; n < NN; n++)
+        for (int n = 0; n < This->nenter; n++)
         {
             for (int i = 0; i < This->ninput; i++)
             {

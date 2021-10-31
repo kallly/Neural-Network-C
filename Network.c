@@ -60,6 +60,8 @@ static void Network_Init(Network *This)
     This->testNetwork = testNetwork;
     This->exportNetwork = exportNetwork;
     This->initValueJson = initValueJson;
+
+    This->nenter = NN;
 }
 
 /******************************************************************************/
@@ -71,12 +73,12 @@ static int generatesPreceptron(Network *This)
     int n = 0;
     for (; n < This->ninput; n++)
     { //create input
-        This->perceptron[n] = New_Perceptron(n,NN, NULL, 0, NULL, This->nperceptronExit[n], SIGMOID);
+        This->perceptron[n] = New_Perceptron(n,This->nenter, NULL, 0, NULL, This->nperceptronExit[n], SIGMOID);
     }
 
     for (; n < This->nperceptron; n++)
     { //create perceptron
-        This->perceptron[n] = New_Perceptron(n,NN, NULL, 0, NULL, This->nperceptronExit[n], SIGMOID);   
+        This->perceptron[n] = New_Perceptron(n,This->nenter, NULL, 0, NULL, This->nperceptronExit[n], SIGMOID);   
     }
     
     for (n = 0; n < This->nperceptron; n++)
@@ -213,7 +215,7 @@ static int train(Network *This, unsigned long iter, double errMin)
         //}
         //TODO : do more clean en perform
 
-        for (int n = 0; n < NN; n++)
+        for (int n = 0; n < This->nenter; n++)
         {
             //printf("%lf - %lf\n",This->perceptron[This->output[0]]->exit[n], This->perceptron[This->solve[0]]->exit[n]);
             This->err += ABS(This->perceptron[This->output[0]]->exit[n] - This->perceptron[This->solve[0]]->exit[n]);
@@ -259,9 +261,9 @@ static int initValueRandom(Network *This)
 /******************************************************************************/
 static int inputData(Network *This)
 {
-    double tempSolve[NN];
-    double temp[3][NN];
-    for (int n = 0; n < NN; n++)
+    double tempSolve[This->nenter];
+    double temp[3][This->nenter];
+    for (int n = 0; n < This->nenter; n++)
     {
         for (int i = 0; i < 3; i++)
         {
@@ -292,8 +294,8 @@ static int testNetwork(Network *This)
     double **tempExit = malloc(sizeof(double *) * This->nperceptron);
     for (int n = 0; n < This->nperceptron; n++)
     {
-        tempExit[n] = malloc(sizeof(double) * NN);
-        memcpy(tempExit[n], perceptronTEST[n]->exit, sizeof(double *) * NN);
+        tempExit[n] = malloc(sizeof(double) * This->nenter);
+        memcpy(tempExit[n], perceptronTEST[n]->exit, sizeof(double *) * This->nenter);
     }
 
     for (int i = 0; i < This->ninput; i++)
@@ -320,7 +322,7 @@ static int testNetwork(Network *This)
 
     for (int n = 0; n < This->nperceptron; n++)
     {
-        memcpy(This->perceptron[n]->exit, tempExit[n], sizeof(double *) * NN);
+        memcpy(This->perceptron[n]->exit, tempExit[n], sizeof(double *) * This->nenter);
     }
     free(tempExit);
 

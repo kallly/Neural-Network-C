@@ -24,15 +24,10 @@ typedef struct Network
         int             (*initValueJson)(struct Network*,char*);
 
         double          err;
-        int             ninput;
-        int             noutput;
-        int             nsolve;
-        int             nperceptron;
-        int             *nperceptronExit;
+        int             ninput,noutput,nsolve,nperceptron,nenter;
 
-        int             *input;
-        int             *output;
-        int             *solve;
+        int             *nperceptronExit,*input,*output,*solve;
+        
         int             **perceptronExit;
 
         Perceptron      **perceptron;
