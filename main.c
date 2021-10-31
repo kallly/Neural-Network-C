@@ -4,11 +4,12 @@
 #include <stdbool.h>
 #include "Network.h"
 
-#define DEFAULTNETWORK ("network/network_template.json")
+#define NN "8"
 #define DEFAULTNETWORKDESC ("network/network_desc_template.txt")
 #define DEFAULTNETWORKSTRUCT ("network/network_struct_template.txt")
-#define DEFAULTRESULT ("result.json")
+#define DEFAULTRESULT ("result.txt")
 #define NPARAMETER 7
+
 
 char **parameter(int argc, char *argv[]);
 
@@ -17,7 +18,7 @@ int main(int argc, char *argv[])
 
     char **allParametre = parameter(argc, argv);
 
-    Network *network = New_Network(allParametre[5], allParametre[6], allParametre[1]);
+    Network *network = New_Network(allParametre[5], allParametre[6], allParametre[1],strtoul(allParametre[0], NULL, 10));
 
     bool end = false;
 
@@ -37,7 +38,7 @@ int main(int argc, char *argv[])
             printf("ERR: %lf", network->err);
             break;
         case 2:
-            network->exportNetwork(network, allParametre[0], allParametre[2]);
+            network->exportNetwork(network, allParametre[2]);
             break;
         case 3:
             network->testNetwork(network);
@@ -70,7 +71,7 @@ char **parameter(int argc, char *argv[])
     {
         buffer[n] = malloc(sizeof(char) * 128);
     }
-    strcpy(buffer[0], DEFAULTNETWORK);
+    strcpy(buffer[0], NN);
     strcpy(buffer[1], "RANDOM");
     strcpy(buffer[2], DEFAULTRESULT);
     strcpy(buffer[3], "10000");
@@ -80,7 +81,7 @@ char **parameter(int argc, char *argv[])
 
     for (int n = 1; n < argc; n++)
     {
-        if (!strcmp(argv[n], "-src:"))
+        if (!strcmp(argv[n], "-nenter:"))
         {
             strcpy(buffer[0], argv[++n]);
         }

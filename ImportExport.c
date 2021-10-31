@@ -15,12 +15,12 @@ int scanLine(FILE *fp, int *data)
     {
         fscanf(fp, "%d", &data[i++]);
         //printf("%d\n",data[i-1]);
-        
+
         fscanf(fp, "%c", &trash);
     } while (trash == ';');
 
     char bufferTrash[256];
-    fgets(bufferTrash,1024,fp);
+    fgets(bufferTrash, 1024, fp);
 
     return 0;
 }
@@ -60,7 +60,7 @@ int fillInNetwork(Network *This, char *descFileName, char *structFileName)
     scanLine(fpDesc, This->solve);
 
     fclose(fpDesc);
-    
+
     FILE *fpStruct;
     fpStruct = fopen(structFileName, "r");
 
@@ -77,10 +77,11 @@ int fillInNetwork(Network *This, char *descFileName, char *structFileName)
 
         int count = 1;
         int i = 0;
-        do{
+        do
+        {
             if (buffer[i] == (char)';')
                 count++;
-        }while(buffer[i++]!='/');
+        } while (buffer[i++] != '/');
 
         This->nperceptronExit[n] = count;
         This->perceptronExit[n] = malloc(sizeof(int) * count);
@@ -90,17 +91,17 @@ int fillInNetwork(Network *This, char *descFileName, char *structFileName)
 
     for (int n = 0; n < This->nperceptron - This->noutput - This->nsolve; n++)
     {
-        
-        scanLine(fpStruct,This->perceptronExit[n]);
+
+        scanLine(fpStruct, This->perceptronExit[n]);
         for (int i = 0; i < This->nperceptronExit[n]; i++)
         {
             printf("Neural %d / Exit %d -> %d\n", n, i, This->perceptronExit[n][i]);
         }
     }
     printf("\n");
-    
+
     fclose(fpStruct);
-    
+
     return 0;
 }
 /******************************************************************************/
@@ -184,111 +185,53 @@ int fillInNetworkJSON(Network *This, char *fileName)
 }
 
 /******************************************************************************/
-int exportNetwork(Network *This, char *networkName, char *fileName)
+int exportNetwork(Network *This, char *fileName)
 {
-
-    if (!strcmp(networkName, fileName))
-    {
-        FILE *source = NULL;
-        FILE *temp = NULL;
-        char ch;
-        source = fopen(networkName, "r");
-        temp = fopen("temp", "w+");
-
-        for (int n = 0; (ch = getc(source)) != EOF; n++)
-        {
-
-            putc(ch, temp);
-        }
-
-        fclose(source);
-        fclose(temp);
-        strcpy(networkName, "temp");
-    }
-
-    FILE *file = NULL;
-    size_t size = (strlen(networkName) + strlen(fileName) + 2) * sizeof(char);
-    char *buffer = malloc(size);
-    snprintf(buffer, size, "%s_%s", networkName, fileName);
-
-    file = fopen(fileName, "w+");
-
-    if (file != NULL)
-    {
-        FILE *source;
-        char ch;
-        source = fopen(networkName, "r");
-
-        int compte;
-        for (int n = 0; (ch = getc(source)) != EOF; n++)
-        {
-            if (ch == '}')
-            {
-                compte = n;
-            }
-        }
-        rewind(source);
-        for (int n = 0; (ch = getc(source)) != EOF; n++)
-        {
-            if (n != compte)
-            {
-                putc(ch, file);
-            }
-        }
-        fclose(source);
-
-        char *neural;
-        neural = malloc(sizeof(char) * 772 * This->nperceptron);
-
-        for (int n = 0; n < This->nperceptron; n++)
-        {
-            char *temp;
-            temp = malloc(sizeof(char) * 516);
-
-            char *weights;
-            weights = malloc(sizeof(char) * 256);
-            unsigned int i = 0;
-
-            if (This->perceptron[n]->nprev > 0)
-            {
-                for (; i < This->perceptron[n]->nprev - 1; i++)
-                {
-                    char *weight;
-                    weight = malloc(sizeof(char) * 32);
-                    snprintf(weight, sizeof(char) * 30, "%lf", This->perceptron[n]->get_synapse(This->perceptron[n],This->perceptron[n]->prev[i]->id)->weight);
-                    strcat(weights, weight);
-                    strcat(weights, ",");
-                    free(weight);
-                }
-
-                char *weight;
-                weight = malloc(sizeof(char) * 32);
-                snprintf(weight, sizeof(char) * 30, "%lf", This->perceptron[n]->get_synapse(This->perceptron[n],This->perceptron[n]->prev[i]->id)->weight);
-                strcat(weights, weight);
-                free(weight);
-            }
-
-            snprintf(temp, sizeof(char) * 516, "\t\t\"%d\":[%s]", n, weights);
-            free(weights);
-            strcat(neural, temp);
-            if (n < This->nperceptron - 1)
-            {
-                strcat(neural, ",\n");
-            }
-            free(temp);
-        }
-
-        char *buffer;
-        buffer = malloc(sizeof(char) * 1032 * This->nperceptron);
-        snprintf(buffer, sizeof(char) * 1032 * This->nperceptron, ",\n\t\"neural\":{\n%s\n\t}\n}", neural);
-
-        fputs(buffer, file);
-        fclose(file);
-    }
-    else
+    FILE *fpResult = NULL;
+    fpResult = fopen(fileName, "w+");
+    if (fpResult == NULL)
     {
         return 0;
     }
+
+    for (int i = 0; i < This->nperceptron; i++)
+    {
+        char *weights;
+        weights = malloc(sizeof(char) * 1024);
+
+        if (This->perceptron[i]->nprev>0)
+        {
+            for (unsigned int j = 0; j < This->perceptron[i]->nprev - 1; j++)
+            {
+                if (j > 7)
+                    exit(0);
+                char *weight;
+                weight = malloc(sizeof(char) * 30);
+                
+                snprintf(weight, 30, "%lf", This->perceptron[i]->synapses[j]->weight);
+                strcat(weights, weight);
+                strcat(weights, ";");
+
+                free(weight);
+            }
+
+            if (This->perceptron[i]->synapses != NULL)
+            {
+                char *weight;
+                weight = malloc(sizeof(char) * 30);
+                snprintf(weight, sizeof(char) * 30, "%lf", This->perceptron[i]->synapses[This->perceptron[i]->nprev - 1]->weight);
+
+                strcat(weights, weight);
+                free(weight);
+            }
+        }
+
+        fprintf(fpResult, "%s//perceptron %d\n", weights, i);
+
+        free(weights);
+    }
+
+    fclose(fpResult);
 
     return 1;
 }
@@ -373,7 +316,7 @@ int initValueJson(Network *This, char *fileName)
         {
             printf("N: %d\tWeight: %d\t%lf\n", n, i, json_object_get_double(json_object_array_get_idx(perceptronWeight[n], i)));
             tempPV = json_object_get_double(json_object_array_get_idx(perceptronWeight[n], i));
-            This->perceptron[n]->set_synapse(This->perceptron[n],This->perceptron[n]->prev[i]->id, tempPV);
+            This->perceptron[n]->set_synapse(This->perceptron[n], This->perceptron[n]->prev[i]->id, tempPV);
         }
     }
     return 0;

@@ -9,8 +9,6 @@
 
 #define ABS(x) (((x) > 0) ? (x) : (-(x)))
 
-#define NN 8
-
 static void Network_Init(Network *);
 static int destructor(Network *This);
 
@@ -21,12 +19,13 @@ static int inputData(Network *This);
 static int testNetwork(Network *This);
 
 /******************************************************************************/
-Network *New_Network(char *descFileName, char *structFileName, char *initValue)
+Network *New_Network(char *descFileName, char *structFileName, char *initValue, int nenter)
 {
     Network *This = malloc(sizeof(Network));
     if (!This)
         return NULL;
     Network_Init(This);
+    This->nenter = nenter;
 
     fillInNetwork(This, descFileName, structFileName);
     generatesPreceptron(This);
@@ -60,8 +59,6 @@ static void Network_Init(Network *This)
     This->testNetwork = testNetwork;
     This->exportNetwork = exportNetwork;
     This->initValueJson = initValueJson;
-
-    This->nenter = NN;
 }
 
 /******************************************************************************/

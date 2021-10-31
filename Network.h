@@ -20,21 +20,21 @@ typedef struct Network
         int             (*inputData)(struct Network*);
         int             (*inputDataCsv)(struct Network*,char*);
         int             (*testNetwork)(struct Network*);
-        int             (*exportNetwork)(struct Network*,char*,char*);
+        int             (*exportNetwork)(struct Network*,char*);
         int             (*initValueJson)(struct Network*,char*);
 
         double          err;
         int             ninput,noutput,nsolve,nperceptron,nenter;
 
         int             *nperceptronExit,*input,*output,*solve;
-        
+
         int             **perceptronExit;
 
         Perceptron      **perceptron;
     } Network ;
 
 
-Network* New_Network(char *descFileName,char *structFileName,char *initValue);
+Network* New_Network(char *descFileName,char *structFileName,char *initValue,int nenter);
 
 #ifdef __cplusplus
 }
