@@ -121,6 +121,17 @@ static int generatesPreceptron(Network *This)
     //    }
     //}
     for (n = 0; n < This->nperceptron; n++)
+    { //link perceptron to output
+        for (int i = 0; i < This->noutput; i++)
+        {
+            This->perceptron[n]->output = This->perceptron[This->output[i]];
+            printf("N: %d\t%p\tOutput: %p\n", n,
+                   (void *)This->perceptron[n],
+                   (void *)This->perceptron[n]->output);
+        }
+    }
+
+    for (n = 0; n < This->nperceptron; n++)
     { //link perceptron to solve
         for (int i = 0; i < This->nsolve; i++)
         {

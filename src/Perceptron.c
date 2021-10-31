@@ -98,6 +98,7 @@ static void Perceptron_Init(Perceptron *This)
 	This->exit = NULL;
 	This->exitDelta = NULL;
 
+	This->output = NULL;
 	This->solve = NULL;
 
 	This->nformed = 0;
@@ -244,35 +245,15 @@ static int formingDelta(Perceptron *This)
 		{
 			s[e] = 0.f;
 
-			if (This->solve != NULL)
-			{
-				s[e] += This->funcAct_d(This->exit[e] - This->solve->exit[e]);
-			}
-			else
-			{
-				if (This->nnext != 0)
-				{
-					for (unsigned int n = 0; n < This->nnext; n++)
-					{
-						s[e] += This->next[n]->exitDelta[e];
-					}
 
-					//double exit = 0;
-					//
-					//printf("%d: ln(%lf)\t",This->id, This->exit[e]);
-					//for (unsigned int n = 0; n < This->nnext; n++)
-					//{
-					//	double weight = This->get_synapse(This->next[n], This->id)->weight;
-					//	exit += This->funcAct_b(This->exit[e]) / weight;
-					//	printf("%lf; ",weight);
-					//}
-					//
-					//printf("%lf / %d = %lf\n", exit, This->nnext, exit/This->nnext);
-					//exit /= This->nnext;
-					//
-					//s[e] += This->funcAct_d(This->exit[e] - exit);
-				}
+			double diff = This->output->exit[e] - This->solve->exit[e];
+			s[e] = diff;
+			//printf("ID: %d -> delta = %lf",This->id,diff);
+			for(unsigned int i=0;i<This->nnext;i++){
+				//printf(" * %lf",This->next[i]->get_synapse(This->next[i], This->id)->weight);
+				s[e] *= This->next[i]->get_synapse(This->next[i], This->id)->weight;
 			}
+			//printf(" = %lf\n",s[e]);
 		}
 		This->set_exitDelta(This, s);
 
@@ -290,26 +271,25 @@ static int update(Perceptron *This)
 {
 
 	double r;
-	double alpha = 0.01;
+	double alpha = 0.05;
 	for (unsigned int n = 0; n < This->nprev; n++)
 	{
 		r = 0.f;
-
+		
+		//printf("ID: %d ", This->id);	
 		for (unsigned int e = 0; e < This->nenter; e++)
 		{
-			/* printf("-----------------------------FFFFFFFFFFFLLLLLLLAAAAAAAAAAAGGGGGG---------------\n\n");
-        printf("-----------------------------EEEEEEEEENNNNNNNNNNNNNNDDDDDDDDDDDDDDDD---------------\n\n");
-              return false;*/
-			//printf("%lf\n",This->get_exitDelta(This)[e]);
-
-			r += This->prev[n]->exit[e] * This->exitDelta[e];
+			r += This->exitDelta[e] * This->prev[n]->exit[e];
+			//printf("%lf * %lf + ",This->exitDelta[e],This->prev[n]->exit[e]);
 		}
 
-		//printf("||||||||||||||||||||||||||||||||||||--------------------->>>>>>>> %lf\n",r[n]);
-
 		double weight = This->get_synapse(This, This->prev[n]->id)->weight;
+		
+		//printf("\nID: %d w = %lf - (0.01 * %lf)\n",This->id,weight,r);
+		
 		r = weight - (r * alpha);
 
+		
 		This->set_synapse(This, This->prev[n]->id, r);
 	}
 

@@ -123,12 +123,10 @@ int exportNetwork(Network *This, char *fileName)
         {
             for (unsigned int j = 0; j < This->perceptron[i]->nprev - 1; j++)
             {
-                if (j > 7)
-                    exit(0);
                 char *weight;
                 weight = malloc(sizeof(char) * 30);
 
-                snprintf(weight, 30, "%lf", This->perceptron[i]->synapses[j]->weight);
+                snprintf(weight, 30, "%lAf", This->perceptron[i]->synapses[j]->weight);
                 strcat(weights, weight);
                 strcat(weights, ";");
 
@@ -139,7 +137,7 @@ int exportNetwork(Network *This, char *fileName)
             {
                 char *weight;
                 weight = malloc(sizeof(char) * 30);
-                snprintf(weight, sizeof(char) * 30, "%lf", This->perceptron[i]->synapses[This->perceptron[i]->nprev - 1]->weight);
+                snprintf(weight, sizeof(char) * 30, "%lAf", This->perceptron[i]->synapses[This->perceptron[i]->nprev - 1]->weight);
 
                 strcat(weights, weight);
                 free(weight);

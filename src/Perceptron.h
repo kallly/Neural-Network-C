@@ -45,7 +45,7 @@ typedef struct Perceptron
     double                  (*funcAct_b)(double);
     double                  (*funcAct_d)(double);
     
-    struct Perceptron **prev, **next, *solve;
+    struct Perceptron **prev, **next, *output, *solve;
     Synapse **synapses;
 
     unsigned int nenter,nprev,nnext,id;

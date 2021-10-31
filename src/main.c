@@ -6,8 +6,8 @@
 #include "Network.h"
 
 #define NN "8"
-#define DEFAULTNETWORKDESC ("network/network_desc_template.txt")
-#define DEFAULTNETWORKSTRUCT ("network/network_struct_template.txt")
+#define DEFAULTNETWORKDESC ("network/02_network_desc_template.txt")
+#define DEFAULTNETWORKSTRUCT ("network/02_network_struct_template.txt")
 #define DEFAULTRESULT ("result.txt")
 #define NPARAMETER 7
 
@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     srand(time(NULL));
 
     //network->inputData(network);
-    network->inputDataCsv(network, "data/(aETb)OUnonc.csv");
+    network->inputDataCsv(network, "data/aOUbOUnonc.csv");
 
     do
     {
